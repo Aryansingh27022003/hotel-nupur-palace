@@ -48,7 +48,10 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ================= SESSION ================= */
+/* ================= PUBLIC CONTACT ROUTE (NO SESSION) ================= */
+app.use("/api/contact", contactRoutes);
+
+/* ================= SESSION (ADMIN ONLY) ================= */
 app.use(session({
   name: "admin.sid",
   secret: process.env.SESSION_SECRET,
@@ -59,6 +62,11 @@ app.use(session({
     sameSite: "none"
   }
 }));
+
+/* ================= PROTECTED ROUTES ================= */
+app.use("/api/booking", bookingRoutes);
+app.use("/api/admin", adminRoutes);
+
 
 /* ================= STATIC FILES ================= */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
