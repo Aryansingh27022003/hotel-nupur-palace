@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Receipt | Hotel Nupur Palace</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<section class="confirmation">
+    <h1>Booking Request Received 🧾</h1>
+
+    <p>Your Booking ID:</p>
+    <h2 id="bookingId">—</h2>
+
+    <p class="confirmation-note">
+        We have received your booking request and payment details.<br>
+        Our team will verify your documents and payment.
+    </p>
+
+    <p class="confirmation-note">
+        ⏳ <b>Status:</b> Pending Admin Approval<br>
+        ⏱️ Expected confirmation within <b>1 hour</b>
+    </p>
+
+    <a id="downloadReceipt" class="btn" download>
+        Download Booking Receipt
+    </a>
+
+    <p class="small-text">
+        ⚠️ Please do not visit the hotel until you receive the
+        <b>Booking Confirmation</b> email.
+    </p>
+</section>
+
+<footer class="footer">
+    <div class="footer-left">
+        <p>© 2025 Hotel Nupur Palace</p>
+    </div>
+
+    <div class="footer-right">
+        <a href="https://www.google.com/maps/place/Hotel+Nupur+Palace/"
+           target="_blank"
+           class="review-link">
+            Love your stay? Rate us on Google
+        </a>
+    </div>
+</footer>
+
+<script src="js/receipt.js"></script>
+</body>
+</html>

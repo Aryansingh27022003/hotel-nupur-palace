@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Room | Hotel Nupur Palace</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar static-nav">
+    <div class="nav-left">Hotel Nupur Palace</div>
+</nav>
+
+<section class="booking">
+    <div class="booking-card">
+
+        <h1>Book Your Stay</h1>
+        <p id="roomInfo"></p>
+
+        <div id="bookingForm">
+
+            <!-- PRIMARY BOOKER -->
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="number" id="age" placeholder="Age" min="1" required>
+
+            <label>Country</label>
+            <input type="text" value="India" readonly>
+
+            <input type="tel" id="phone" placeholder="Mobile Number" maxlength="10" required>
+            <input type="email" id="email" placeholder="Email Address" required>
+
+            <input type="tel" id="whatsapp" placeholder="WhatsApp Number" maxlength="10">
+
+            <label class="inline-checkbox">
+                <input type="checkbox" id="sameAsMobile">
+                WhatsApp number same as mobile
+            </label>
+
+            <label>ID Proof (Primary Booker)</label>
+            <input type="file" id="bookerId" accept=".jpg,.jpeg,.png,.pdf" required>
+
+            <label>Check-in</label>
+            <input type="date" id="checkIn" required>
+
+            <label>Check-out</label>
+            <input type="date" id="checkOut" required>
+
+            <!-- GUESTS -->
+            <label>Additional Guests</label>
+            <input type="number" id="guests" min="0" value="0">
+            <div id="guestDetails"></div>
+
+            <input type="text" id="fromPlace" placeholder="Coming From" required>
+            <input type="text" id="purpose" placeholder="Purpose of Visit" required>
+
+            <p id="totalAmount"></p>
+
+              <div style="margin-top:20px;border-top:1px dashed #ccc;padding-top:15px;">
+
+              <h3>Refund Details (Required if booking is rejected)</h3>
+
+              <p style="font-size:13px;color:#555">
+              In case your booking is rejected, refund will be sent to the details below.
+              </p>
+
+              <input
+              type="text"
+              id="refundUpi"
+              placeholder="Refund UPI ID (e.g. xxxxxxxx@okxxxx)">
+
+              <p style="text-align:center;margin:8px 0;">OR</p>
+
+              <input
+              type="tel"
+              id="refundPhone"
+              placeholder="Refund Phone Number (10 digits)"
+              maxlength="10">
+
+              </div>
+
+            <button id="createBookingBtn" class="btn">
+                Submit Booking Request
+            </button>
+
+            <!-- PAYMENT SECTION -->
+            <div id="paymentInstructions"
+                 style="display:none;margin-top:25px;border-top:1px solid #ddd;padding-top:15px;">
+
+                <h3>Payment Instructions</h3>
+
+                <p>
+                    Pay the <b>exact amount</b> via UPI.<br>
+                    Booking will be confirmed after admin verification.
+                </p>
+
+                <img id="upiQr" style="width:220px;margin:auto;display:block">
+
+                <p style="text-align:center">
+                    <b>UPI ID:</b> <span id="upiText"></span><br>
+                    <b>Amount:</b> ₹<span id="payAmount"></span>
+                </p>
+
+                <small style="color:#b00;text-align:center;display:block">
+                    ⚠ Wrong amount will lead to rejection
+                </small>
+
+                <label>Upload Payment Screenshot / UTR</label>
+                <input type="file" id="paymentProof" accept=".jpg,.jpeg,.png,.pdf" required>
+
+                <button id="finalSubmitBtn" class="btn" style="margin-top:10px;">
+                    Upload Payment Proof
+                </button>
+            </div>
+           
+        </div>
+    </div>
+</section>
+
+<script src="js/booking.js"></script>
+</body>
+</html>

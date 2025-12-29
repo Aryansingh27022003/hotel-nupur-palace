@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Rooms | Hotel Nupur Palace</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar static-nav">
+    <div class="nav-left">Hotel Nupur Palace</div>
+    <div class="nav-right">
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="photos.html">Photos</a>
+        <a href="contact.html">Contact Us</a>
+    </div>
+</nav>
+
+<section class="rooms-page">
+    <h1>Book Your Room</h1>
+    <p class="rooms-note">
+        * Base price shown. Additional ₹200 per extra guest.
+    </p>
+
+    <div class="room-grid">
+
+        <!-- DORMITORY -->
+        <div class="room-card">
+            <div class="room-image flip-card">
+                <div class="flip-inner">
+                    <img class="flip-front-img" src="assets/rooms/dormitory1.png" alt="Dormitory">
+                    <img class="flip-back-img" src="assets/rooms/dormitory2.png" alt="Dormitory">
+                </div>
+            </div>
+            <h3>Dormitory</h3>
+            <p class="price">₹200 / night</p>
+            <p class="rule">₹200 per guest</p>
+            <button onclick="bookRoom('Dormitory',200)">Book Now</button>
+        </div>
+
+        <!-- NON ATTACHED -->
+        <div class="room-card">
+            <div class="room-image flip-card">
+                <div class="flip-inner">
+                    <img class="flip-front-img" src="assets/rooms/non-at1.jpg" alt="Non Attached">
+                    <img class="flip-back-img" src="assets/rooms/non-at2.jpg" alt="Non Attached">
+                </div>
+            </div>
+            <h3>Non-Attached Room</h3>
+            <p class="price">₹500 / night</p>
+            <p class="rule">₹200 per guest</p>
+            <button onclick="bookRoom('Non-Attached Room',500)">Book Now</button>
+        </div>
+
+        <!-- ATTACHED -->
+        <div class="room-card">
+            <div class="room-image flip-card">
+                <div class="flip-inner">
+                    <img class="flip-front-img" src="assets/rooms/non-ac1.png" alt="Attached Room">
+                    <img class="flip-back-img" src="assets/rooms/non-ac2.png" alt="Attached Room">
+                </div>
+            </div>
+            <h3>Attached Room</h3>
+            <p class="price">₹600 / night</p>
+            <p class="rule">₹200 per guest</p>
+            <button onclick="bookRoom('Attached Room',600)">Book Now</button>
+        </div>
+
+        <!-- DELUXE -->
+        <div class="room-card">
+            <div class="room-image flip-card">
+                <div class="flip-inner">
+                    <img class="flip-front-img" src="assets/rooms/deluxe1.jpg" alt="Deluxe Room">
+                    <img class="flip-back-img" src="assets/rooms/deluxe2.jpg" alt="Deluxe Room">
+                </div>
+            </div>
+            <h3>Deluxe Room</h3>
+            <p class="price">₹800 / night</p>
+            <p class="rule">₹200 per guest</p>
+            <button onclick="bookRoom('Deluxe Room',800)">Book Now</button>
+        </div>
+
+        <!-- AC -->
+        <div class="room-card">
+            <div class="room-image flip-card">
+                <div class="flip-inner">
+                    <img class="flip-front-img" src="assets/rooms/ac1.png" alt="AC Room">
+                    <img class="flip-back-img" src="assets/rooms/ac2.png" alt="AC Room">
+                </div>
+            </div>
+            <h3>AC Room</h3>
+            <p class="price">₹1100 / night</p>
+            <p class="rule">₹200 per guest</p>
+            <button onclick="bookRoom('AC Room',1100)">Book Now</button>
+        </div>
+
+        <!-- SUITE -->
+        <div class="room-card">
+            <div class="room-image flip-card">
+                <div class="flip-inner">
+                    <img class="flip-front-img" src="assets/rooms/suite1.png" alt="Suite Room">
+                    <img class="flip-back-img" src="assets/rooms/suite2.png" alt="Suite Room">
+                </div>
+            </div>
+            <h3>Suite Room</h3>
+            <p class="price">₹1300 / night</p>
+            <p class="rule">₹200 per guest</p>
+            <button onclick="bookRoom('Suite Room',1300)">Book Now</button>
+        </div>
+
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-left">
+        <p>© 2025 Hotel Nupur Palace</p>
+    </div>
+
+    <div class="footer-right">
+        <a href="https://www.google.com/maps/place/Hotel+Nupur+Palace/"
+           target="_blank"
+           class="review-link">
+            Love your stay? Rate us on Google
+        </a>
+    </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

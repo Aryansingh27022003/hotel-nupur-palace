@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard | Hotel Nupur Palace</title>
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body { padding: 20px; font-family: Arial; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+    th { background: #f5f5f5; }
+    button { padding: 6px 10px; cursor: pointer; margin-bottom: 4px; }
+    .filters input, .filters select {
+      margin-right: 8px;
+      padding: 6px;
+    }
+    small { color: #555; }
+  </style>
+</head>
+
+<body>
+
+<h1>Admin Dashboard</h1>
+
+<!-- ================= FILTERS ================= -->
+<div class="filters">
+  <input type="text" id="search" placeholder="Search Booking ID / Name">
+
+  <select id="roomFilter">
+    <option value="">All Rooms</option>
+    <option>Deluxe</option>
+    <option>Super Deluxe</option>
+    <option>Family</option>
+  </select>
+
+  <select id="statusFilter">
+    <option value="">All Status</option>
+    <option value="PENDING_APPROVAL">Pending</option>
+    <option value="APPROVED">Approved</option>
+    <option value="REJECTED">Rejected</option>
+  </select>
+
+  <input type="date" id="fromDate">
+  <input type="date" id="toDate">
+
+  <button onclick="loadBookings()">🔍 Apply</button>
+</div>
+
+<br>
+
+<!-- ================= TABLE ================= -->
+<table>
+  <thead>
+    <tr>
+      <th>Booking ID</th>
+      <th>Primary Guest</th>
+      <th>Stay</th>
+      <th>Guests</th>
+      <th>Documents</th>
+      <th>Refund / Rejection</th>
+      <th>Status / Action</th>
+    </tr>
+  </thead>
+
+  <tbody id="bookings">
+    <tr>
+      <td colspan="7" style="text-align:center">Loading…</td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+async function loadBookings() {
+  try {
+    const params = new URLSearchParams();
+
+    const search = document.getElementById("search").value;
+    const room = document.getElementById("roomFilter").value;
+    const status = document.getElementById("statusFilter").value;
+    const from = document.getElementById("fromDate").value;
+    const to = document.getElementById("toDate").value;
+
+    if (search) params.append("search", search);
+    if (room) params.append("room", room);
+    if (status) params.append("status", status);
+    if (from && to) {
+      params.append("from", from);
+      params.append("to", to);
+    }
+
+    const res = await fetch(`/api/admin/bookings?${params.toString()}`, {
+      credentials: "include"
+    });
+
+    if (!res.ok) {
+      alert("Unauthorized. Please login again.");
+      window.location.href = "/admin/login.html";
+      return;
+    }
+
+    const data = await res.json();
+    const tbody = document.getElementById("bookings");
+
+    if (!data.length) {
+      tbody.innerHTML =
+        `<tr><td colspan="7" style="text-align:center">No bookings found</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(b => `
+      <tr>
+        <!-- BOOKING ID -->
+        <td><b>${b.bookingId}</b></td>
+
+        <!-- PRIMARY GUEST -->
+        <td>
+        <b>${b.name}</b><br>
+        Age: ${b.age || "-"}<br>
+        📞 ${b.phone}<br>
+        💬 ${b.whatsapp || "-"}<br>
+        ✉️ ${b.email || "-"}<br><br>
+
+        <b>Coming From:</b> ${b.fromPlace || "-"}<br>
+        <b>Purpose of Visit:</b> ${b.purpose || "-"}<br>
+        <b>Refund Mode:</b> ${b.refundMode || "-"}<br>
+        <b>Refund To:</b> ${b.refundValue || "-"}
+
+
+        </td>
+
+
+        <!-- STAY -->
+        <td>
+          🏨 ${b.roomType}<br>
+          📅 ${b.checkIn} → ${b.checkOut}<br>
+          💰 ₹${b.amount}
+        </td>
+
+        <!-- GUESTS -->
+        <td>
+          ${
+            b.guests?.length
+              ? b.guests.map((g, i) => `
+                <b>Guest ${i + 1}</b><br>
+                ${g.name}, ${g.age} (${g.relation})<br><br>
+               <b>Guest ${i + 1} ID:</b> 
+               <a href="/uploads/${g.idProofPath}" target="_blank">View</a><br><br>
+              `).join("")
+               
+              : "<small>No additional guests</small>"
+          }
+        </td>
+
+        <!-- DOCUMENTS -->
+        <td>
+          <b>Primary ID:</b>
+          <a href="/uploads/${b.idProofPath}" target="_blank">View</a><br><br>
+
+          ${
+            b.paymentProofPath
+              ? `<b>Payment Proof:</b>
+                 <a href="/uploads/${b.paymentProofPath}" target="_blank">View</a><br><br>`
+              : `<small>No payment proof</small><br><br>`
+          }
+
+          ${
+            b.refundProofPath
+              ? `<b>Refund Proof:</b>
+                 <a href="/uploads/${b.refundProofPath}" target="_blank">View</a><br>`
+              : ""
+          }
+        </td>
+
+        <!-- REFUND / REJECTION -->
+        <td>
+          ${
+            b.bookingStatus === "REJECTED"
+              ? `
+                <b>Reason:</b><br>
+                ${b.rejectionReason || "-"}<br><br>
+                <b>Refund To:</b> ${b.refundValue || "-"}
+              `
+              : "<small>—</small>"
+          }
+        </td>
+
+        <!-- STATUS / ACTION -->
+        <td>
+          <b>${b.bookingStatus}</b><br>
+          <small>${b.paymentStatus}</small><br><br>
+
+          ${
+            b.bookingStatus === "PENDING_APPROVAL"
+              ? `
+                <button onclick="approveBooking('${b.bookingId}')">✅ Approve</button><br>
+                <button onclick="openRejectBox('${b.bookingId}')">❌ Reject</button>
+              `
+              : b.bookingStatus === "APPROVED"
+                ? `
+                  ✅ Approved<br>
+                  <a href="/confirmations/${b.bookingId}.pdf" target="_blank">
+                    Download PDF
+                  </a>
+                `
+                : "❌ Rejected"
+          }
+        </td>
+      </tr>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+    alert("Dashboard error");
+  }
+}
+
+async function approveBooking(bookingId) {
+  if (!confirm("Approve this booking?")) return;
+
+  const res = await fetch(`/api/admin/approve/${bookingId}`, {
+    method: "POST",
+    credentials: "include"
+  });
+
+  if (!res.ok) {
+    alert("Approval failed");
+    return;
+  }
+
+  alert("Booking approved");
+  loadBookings();
+}
+
+function openRejectBox(bookingId) {
+  document.getElementById("rejectBookingId").value = bookingId;
+  document.getElementById("rejectReason").value = "";
+  document.getElementById("refundMode").value = "";
+  document.getElementById("refundValue").value = "";
+  document.getElementById("refundProof").value = "";
+  document.getElementById("rejectBox").style.display = "block";
+}
+
+function closeRejectBox() {
+  document.getElementById("rejectBox").style.display = "none";
+}
+
+async function submitRejection() {
+  const bookingId = document.getElementById("rejectBookingId").value;
+  const reason = document.getElementById("rejectReason").value.trim();
+  const refundMode = document.getElementById("refundMode").value;
+  const refundValue = document.getElementById("refundValue").value.trim();
+  const refundProof = document.getElementById("refundProof").files[0];
+
+  if (!reason) {
+    alert("Reason is mandatory");
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append("reason", reason);
+if (refundMode) fd.append("refundMode", refundMode);
+if (refundValue) fd.append("refundValue", refundValue);
+if (refundProof) fd.append("refundProof", refundProof);
+
+
+  const res = await fetch(`/api/admin/reject/${bookingId}`, {
+    method: "POST",
+    credentials: "include",
+    body: fd
+  });
+
+  if (!res.ok) {
+    alert("Rejection failed");
+    return;
+  }
+
+  alert("Booking rejected successfully");
+  closeRejectBox();
+  loadBookings();
+}
+
+
+/* AUTO LOAD */
+loadBookings();
+</script>
+<!-- ================= REJECTION MODAL ================= -->
+<div id="rejectBox" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  z-index:1000;
+">
+
+  <div style="
+    background:#fff;
+    width:420px;
+    margin:80px auto;
+    padding:20px;
+    border-radius:6px;
+  ">
+
+    <h3>Reject Booking</h3>
+
+    <input type="hidden" id="rejectBookingId">
+
+    <label>Rejection Reason</label>
+    <textarea id="rejectReason" rows="3"></textarea>
+
+    <label>Refund Mode</label>
+    <select id="refundMode">
+      <option value="">Select</option>
+      <option value="UPI">UPI</option>
+      <option value="PHONE">Phone</option>
+    </select>
+
+    <label>Refund To</label>
+    <input id="refundValue" placeholder="UPI ID or Phone Number">
+
+    <label>Refund Proof (Required)</label>
+    <input type="file" id="refundProof" accept=".jpg,.jpeg,.png,.pdf">
+
+    <br><br>
+
+    <button onclick="submitRejection()">Submit Rejection</button>
+    <button onclick="closeRejectBox()">Cancel</button>
+  </div>
+</div>
+
+
+</body>
+</html>
