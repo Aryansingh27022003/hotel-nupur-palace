@@ -15,11 +15,16 @@ const app = express();
 /* ================= TRUST PROXY (REQUIRED ON RENDER) ================= */
 app.set("trust proxy", 1);
 
-/* ================= CORS ================= */
+/* ================= CORS (GITHUB PAGES → RENDER) ================= */
 app.use(cors({
   origin: "https://aryansingh27022003.github.io",
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// 🔴 REQUIRED FOR PREFLIGHT REQUESTS
+app.options("*", cors());
 
 /* ================= BODY PARSERS ================= */
 app.use(express.json());
@@ -32,12 +37,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,        // HTTPS only
-    sameSite: "none"     // Required for cross-site cookies
+    secure: true,      // HTTPS only (Render)
+    sameSite: "none"   // Required for cross-site cookies
   }
 }));
 
-/* ================= STATIC FILES (UPLOADS & PDFs ONLY) ================= */
+/* ================= STATIC FILES (ONLY BACKEND FILES) ================= */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/receipts", express.static(path.join(__dirname, "receipts")));
 app.use("/confirmations", express.static(path.join(__dirname, "confirmations")));
