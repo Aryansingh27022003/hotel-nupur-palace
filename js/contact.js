@@ -1,22 +1,47 @@
 document.getElementById("contactForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const email = document.getElementById("email").value;
-    const message = document.getElementById("message").value;
-    const status = document.getElementById("contactStatus");
+  const emailInput = document.getElementById("email");
+  const messageInput = document.getElementById("message");
+  const status = document.getElementById("contactStatus");
 
-    const res = await fetch("https://hotel-nupur-backend.onrender.com/api/contact/send", {
+  const email = emailInput.value.trim();
+  const message = messageInput.value.trim();
+
+  // 🔐 Basic validation
+  if (!email || !message) {
+    status.innerText = "Please fill in all fields.";
+    status.style.color = "red";
+    return;
+  }
+
+  status.innerText = "Sending message...";
+  status.style.color = "black";
+
+  try {
+    const res = await fetch(
+      "https://hotel-nupur-backend.onrender.com/api/contact/send",
+      {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ email, message })
-    });
+      }
+    );
 
-    if (res.ok) {
-        status.innerText = "Thank you! Your message has been sent.";
-        status.style.color = "green";
-        document.getElementById("contactForm").reset();
-    } else {
-        status.innerText = "Failed to send message. Please try again.";
-        status.style.color = "red";
+    if (!res.ok) {
+      throw new Error("Server responded with error");
     }
+
+    status.innerText = "Thank you! Your message has been sent.";
+    status.style.color = "green";
+    document.getElementById("contactForm").reset();
+
+  } catch (err) {
+    console.error("Contact form error:", err);
+    status.innerText =
+      "Unable to send message right now. Please try again later.";
+    status.style.color = "red";
+  }
 });
