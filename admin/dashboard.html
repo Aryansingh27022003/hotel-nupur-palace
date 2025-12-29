@@ -89,7 +89,7 @@ async function loadBookings() {
       params.append("to", to);
     }
 
-    const res = await fetch(`/api/admin/bookings?${params.toString()}`, {
+    const res = await fetch(`https://hotel-nupur-backend.onrender.com/api/admin/bookings?${params.toString()}`, {
       credentials: "include"
     });
 
@@ -218,7 +218,7 @@ async function loadBookings() {
 async function approveBooking(bookingId) {
   if (!confirm("Approve this booking?")) return;
 
-  const res = await fetch(`/api/admin/approve/${bookingId}`, {
+  const res = await fetch(`https://hotel-nupur-backend.onrender.com/api/admin/approve/${bookingId}`, {
     method: "POST",
     credentials: "include"
   });
@@ -264,7 +264,7 @@ if (refundValue) fd.append("refundValue", refundValue);
 if (refundProof) fd.append("refundProof", refundProof);
 
 
-  const res = await fetch(`/api/admin/reject/${bookingId}`, {
+  const res = await fetch(`https://hotel-nupur-backend.onrender.com/api/admin/reject/${bookingId}`, {
     method: "POST",
     credentials: "include",
     body: fd

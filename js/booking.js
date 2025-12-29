@@ -193,7 +193,7 @@ createBookingBtn.onclick = async () => {
       fd.append(`guest_id_${i}`, document.querySelector(`[name="guest_id_${i}"]`).files[0]);
     }
 
-    const res = await fetch("/api/booking/create-pending", {
+    const res = await fetch("https://hotel-nupur-backend.onrender.com/api/booking/create-pending", {
       method: "POST",
       body: fd
     });
@@ -240,7 +240,7 @@ finalSubmitBtn.onclick = async () => {
   const fd = new FormData();
   fd.append("paymentProof", paymentProofInput.files[0]);
 
-  const res = await fetch(`/api/booking/upload-payment-proof/${bookingId}`, {
+  const res = await fetch(`https://hotel-nupur-backend.onrender.com/api/booking/upload-payment-proof/${bookingId}`, {
     method: "POST",
     body: fd
   });
