@@ -12,19 +12,37 @@ const adminRoutes = require("./routes/admin");
 
 const app = express();
 
-/* ================= TRUST PROXY (REQUIRED ON RENDER) ================= */
+/* ================= TRUST PROXY (RENDER) ================= */
 app.set("trust proxy", 1);
 
-/* ================= CORS (GITHUB PAGES → RENDER) ================= */
-app.use(cors({
-  origin: "https://aryansingh27022003.github.io",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+/* ================= CORS (FINAL FIX) ================= */
+const allowedOrigins = [
+  "https://aryansingh27022003.github.io"
+];
 
-// 🔴 REQUIRED FOR PREFLIGHT REQUESTS
-app.options("*", cors());
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
+
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 /* ================= BODY PARSERS ================= */
 app.use(express.json());
@@ -37,12 +55,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,      // HTTPS only (Render)
-    sameSite: "none"   // Required for cross-site cookies
+    secure: true,
+    sameSite: "none"
   }
 }));
 
-/* ================= STATIC FILES (ONLY BACKEND FILES) ================= */
+/* ================= STATIC FILES ================= */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/receipts", express.static(path.join(__dirname, "receipts")));
 app.use("/confirmations", express.static(path.join(__dirname, "confirmations")));
@@ -62,7 +80,6 @@ app.use("/api/admin", adminRoutes);
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-
   } catch (err) {
     console.error("❌ Startup failed:", err);
     process.exit(1);
