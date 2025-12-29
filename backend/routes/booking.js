@@ -602,7 +602,7 @@ router.post(
       const pdfPath = path.join(receiptDir, `${booking.bookingId}.pdf`);
       const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-      doc.pipe(fs.createWriteStream(pdfPath));
+      doc.pipe(fs.createWriteStream(receiptPdfPath));
 
       /* ---------- BORDER ---------- */
       doc.rect(25, 25, 560, 792).stroke("#cccccc");
@@ -663,7 +663,7 @@ router.post(
       await sendEmail(
         booking.email,
         booking.bookingId,
-        pdfPath,
+        booking.receiptPdfPath,
         "RECEIPT"
       );
 
