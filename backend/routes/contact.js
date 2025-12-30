@@ -33,7 +33,7 @@ router.post("/send", async (req, res) => {
           name: "Hotel Nupur Palace"
         },
         to: [
-          { email: "uttamnupur@gmail.com" }
+          { email: "namename2092002@gmail.com" }
         ],
         replyTo: { email },
         subject: "New Contact Message - Hotel Nupur Palace",

@@ -250,5 +250,5 @@ finalSubmitBtn.onclick = async () => {
     return;
   }
 
-  window.location.href = `/receipt.html?bookingId=${bookingId}`;
+  window.location.href = `/hotel-nupur-palace/receipt.html?bookingId=${bookingId}`;
 };
