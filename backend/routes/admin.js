@@ -84,7 +84,9 @@ router.post("/approve/:bookingId", async (req, res) => {
 
     const pdfPath = path.join(pdfDir, `${booking.bookingId}.pdf`);
     const doc = new PDFDocument({ size: "A4", margin: 55 });
-    doc.pipe(fs.createWriteStream(pdfPath));
+    const writeStream = fs.createWriteStream(pdfPath);
+    doc.pipe(writeStream);
+
 
     /* ---------- PAGE BORDER ---------- */
     doc.rect(30, 30, 535, 782).stroke("#cccccc");
