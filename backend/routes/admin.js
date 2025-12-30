@@ -9,9 +9,16 @@ const multer = require("multer");
 const router = express.Router();
 
 /* ================= MULTER (REFUND PROOF) ================= */
-const upload = multer({
-  dest: path.join(__dirname, "..", "uploads")
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "..", "uploads"),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + "-" + file.fieldname + ext);
+  }
 });
+
+const upload = multer({ storage });
+
 
 
 
@@ -180,10 +187,14 @@ router.post("/approve/:bookingId", async (req, res) => {
         { align: "center" }
       );
 
-    doc.end();
+doc.end();
 
-    /* ---------- EMAIL ---------- */
-    await sendBrevoEmail({
+await new Promise((resolve, reject) => {
+  doc.on("finish", resolve);
+  doc.on("error", reject);
+});
+
+await sendBrevoEmail({
   to: booking.email,
   subject: "Booking Confirmed – Hotel Nupur Palace",
   text: `
@@ -202,6 +213,7 @@ Hotel Nupur Palace
 `,
   attachmentPath: pdfPath
 });
+
 
 
     res.json({ success: true });

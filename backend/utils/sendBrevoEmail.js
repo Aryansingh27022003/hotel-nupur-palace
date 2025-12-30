@@ -18,7 +18,7 @@ module.exports = async function sendBrevoEmail({
   };
 
   if (attachmentPath) {
-    payload.attachment = [{
+    payload.attachments = [{
       name: attachmentPath.split("/").pop(),
       content: fs.readFileSync(attachmentPath).toString("base64")
     }];
