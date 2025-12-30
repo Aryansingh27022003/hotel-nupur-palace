@@ -1,7 +1,5 @@
 const express = require("express");
 const Booking = require("../models/Booking");
-const Admin = require("../models/Admin");
-const bcrypt = require("bcrypt");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
@@ -15,29 +13,7 @@ const upload = multer({
   dest: path.join(__dirname, "..", "uploads")
 });
 
-/* ================= ADMIN LOGIN ================= */
-router.post("/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
 
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const ok = await bcrypt.compare(password, admin.password);
-    if (!ok) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    req.session.admin = true;
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error("Admin login error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
 
 /* ================= GET BOOKINGS (WITH FILTERS) ================= */
 router.get("/bookings", async (req, res) => {
