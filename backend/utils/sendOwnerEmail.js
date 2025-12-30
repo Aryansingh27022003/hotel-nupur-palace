@@ -1,12 +1,4 @@
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const fetch = require("node-fetch");
 
 async function sendOwnerEmail(booking) {
   const html = `
@@ -22,12 +14,29 @@ async function sendOwnerEmail(booking) {
     <p><b>Status:</b> PAID</p>
   `;
 
-  await transporter.sendMail({
-    from: `"Hotel Nupur Palace" <${process.env.EMAIL_USER}>`,
-    to: "asinghrajput135@gmail.com",   // OWNER EMAIL
-    subject: `New Booking: ${booking.bookingId}`,
-    html
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY
+    },
+    body: JSON.stringify({
+      sender: {
+        email: process.env.BREVO_SENDER,
+        name: "Hotel Nupur Palace"
+      },
+      to: [
+        { email: "asinghrajput135@gmail.com" } // OWNER EMAIL
+      ],
+      subject: `New Booking: ${booking.bookingId}`,
+      htmlContent: html
+    })
   });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error("Brevo owner email failed: " + err);
+  }
 }
 
 module.exports = sendOwnerEmail;

@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-const sendEmail = require("../utils/sendEmail");
+const sendBrevoEmail = require("../utils/sendBrevoEmail");
 const multer = require("multer");
 
 const router = express.Router();
@@ -211,12 +211,26 @@ router.post("/approve/:bookingId", async (req, res) => {
     doc.end();
 
     /* ---------- EMAIL ---------- */
-    await sendEmail(
-      booking.email,
-      booking.bookingId,
-      pdfPath,
-      "CONFIRMATION"
-    );
+    await sendBrevoEmail({
+  to: booking.email,
+  subject: "Booking Confirmed – Hotel Nupur Palace",
+  text: `
+Dear ${booking.name},
+
+Your booking has been APPROVED.
+
+Booking ID: ${booking.bookingId}
+Room Type: ${booking.roomType}
+Check-in: ${booking.checkIn}
+Check-out: ${booking.checkOut}
+
+Please find the attached confirmation PDF.
+
+Hotel Nupur Palace
+`,
+  attachmentPath: pdfPath
+});
+
 
     res.json({ success: true });
 
@@ -266,21 +280,31 @@ router.post(
 
       await booking.save();
 
-      await sendEmail(
-        booking.email,
-        booking.bookingId,
-        booking.refundProofPath
-          ? path.join(__dirname, "..", "uploads", booking.refundProofPath)
-          : null,
-        "REJECTED",
-        `
-Reason: ${booking.rejectionReason}
+      await sendBrevoEmail({
+  to: booking.email,
+  subject: "Booking Rejected – Hotel Nupur Palace",
+  text: `
+Dear ${booking.name},
+
+Your booking has been REJECTED.
+
+Booking ID: ${booking.bookingId}
+
+Reason:
+${booking.rejectionReason}
 
 Refund Status: ${booking.paymentStatus}
 Refund Mode: ${booking.refundMode || "Not processed"}
 Refund To: ${booking.refundValue || "Not processed"}
-        `
-      );
+
+Hotel Nupur Palace
+`,
+  attachmentPath: booking.refundProofPath
+    ? path.join(__dirname, "..", "uploads", booking.refundProofPath)
+    : null
+});
+
+
 
       res.json({ success: true });
 

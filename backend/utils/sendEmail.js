@@ -1,12 +1,5 @@
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const fetch = require("node-fetch");
+const fs = require("fs");
 
 module.exports = async function sendEmail(
   to,
@@ -24,32 +17,16 @@ module.exports = async function sendEmail(
     subject = "Booking Request Received | Hotel Nupur Palace";
     html = `
       <p>Dear Guest,</p>
-
-      <p>
-        Thank you for choosing <b>Hotel Nupur Palace</b>.
-      </p>
-
-      <p>
-        We have successfully received your booking request.
-      </p>
-
+      <p>Thank you for choosing <b>Hotel Nupur Palace</b>.</p>
+      <p>We have successfully received your booking request.</p>
       <p><b>Booking ID:</b> ${bookingId}</p>
-
       <p>
-        Our team is currently verifying your documents and payment.
-        You will receive the confirmation email within <b>1 hour</b>.
+        Our team is verifying your documents and payment.
+        You will receive confirmation within <b>1 hour</b>.
       </p>
-
-      <p>
-        Kindly do not visit the hotel until you receive the
-        official <b>Booking Confirmation</b>.
-      </p>
-
+      <p>Please do NOT visit the hotel until confirmation.</p>
       <br>
-      <p>
-        Warm regards,<br>
-        <b>Hotel Nupur Palace</b>
-      </p>
+      <p>Warm regards,<br><b>Hotel Nupur Palace</b></p>
     `;
   }
 
@@ -58,36 +35,12 @@ module.exports = async function sendEmail(
     subject = "Booking Confirmed | Hotel Nupur Palace";
     html = `
       <p>Dear Guest,</p>
-
-      <p>
-        We are pleased to inform you that your booking has been
-        <b>successfully confirmed</b>.
-      </p>
-
+      <p>Your booking has been <b>successfully confirmed</b>.</p>
       <p><b>Booking ID:</b> ${bookingId}</p>
-
-      <p>
-        Please find your official booking confirmation attached.
-      </p>
-
-      <p>
-        We look forward to welcoming you.
-      </p>
-
+      <p>Please find your confirmation attached.</p>
       <br>
-      <p>
-        Warm regards,<br>
-        <b>Hotel Nupur Palace</b>
-      </p>
+      <p>Warm regards,<br><b>Hotel Nupur Palace</b></p>
     `;
-
-    // ✅ SAFE ATTACHMENT
-    if (pdfPath) {
-      attachments.push({
-        filename: `${bookingId}.pdf`,
-        path: pdfPath
-      });
-    }
   }
 
   /* ================= REJECTED ================= */
@@ -95,46 +48,43 @@ module.exports = async function sendEmail(
     subject = "Booking Rejected | Hotel Nupur Palace";
     html = `
       <p>Dear Guest,</p>
-
-      <p>
-        Thank you for choosing <b>Hotel Nupur Palace</b>.
-      </p>
-
-      <p>
-        We regret to inform you that your booking request
-        (<b>${bookingId}</b>) could not be approved.
-      </p>
-
-      <p>
-        <b>Reason:</b><br>
-        ${rejectionReason}
-      </p>
-
-      <p>
-        If any payment was made, the refund will be processed shortly.
-      </p>
-
+      <p>Your booking (<b>${bookingId}</b>) could not be approved.</p>
+      <p><b>Reason:</b><br>${rejectionReason}</p>
+      <p>If payment was made, refund will be processed.</p>
       <br>
-      <p>
-        Warm regards,<br>
-        <b>Hotel Nupur Palace</b>
-      </p>
+      <p>Warm regards,<br><b>Hotel Nupur Palace</b></p>
     `;
-
-    // ✅ OPTIONAL: refund proof attachment (no template change)
-    if (pdfPath) {
-      attachments.push({
-        filename: "refund-proof.pdf",
-        path: pdfPath
-      });
-    }
   }
 
-  await transporter.sendMail({
-    from: `"Hotel Nupur Palace" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-    attachments
+  /* ================= ATTACHMENT ================= */
+  if (pdfPath && fs.existsSync(pdfPath)) {
+    attachments.push({
+      content: fs.readFileSync(pdfPath).toString("base64"),
+      name: `${bookingId}.pdf`
+    });
+  }
+
+  /* ================= SEND VIA BREVO ================= */
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY
+    },
+    body: JSON.stringify({
+      sender: {
+        email: process.env.BREVO_SENDER,
+        name: "Hotel Nupur Palace"
+      },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+      attachment: attachments
+    })
   });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error("Brevo email failed: " + err);
+  }
 };

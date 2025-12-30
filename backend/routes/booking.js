@@ -481,6 +481,8 @@ const Booking = require("../models/Booking");
 const sendOwnerEmail = require("../utils/sendOwnerEmail");
 const sendEmail = require("../utils/sendEmail");
 
+
+
 const router = express.Router();
 
 /* ================= MULTER CONFIG ================= */
@@ -504,19 +506,16 @@ router.post("/create-pending", upload.any(), async (req, res) => {
     const body = req.body;
     const files = req.files || [];
 
-    /* ---------- PRIMARY ID ---------- */
     const bookerFile = files.find(f => f.fieldname === "bookerId");
     if (!bookerFile) {
       return res.status(400).json({ error: "Primary ID proof required" });
     }
 
-    /* ---------- GUEST DETAILS ---------- */
     const guestCount = parseInt(body.guests || "0", 10);
     const guests = [];
 
     for (let i = 1; i <= guestCount; i++) {
       const guestIdFile = files.find(f => f.fieldname === `guest_id_${i}`);
-
       guests.push({
         name: body[`guest_name_${i}`],
         age: body[`guest_age_${i}`],
@@ -525,7 +524,6 @@ router.post("/create-pending", upload.any(), async (req, res) => {
       });
     }
 
-    /* ---------- SAVE BOOKING ---------- */
     const booking = new Booking({
       bookingId,
       name: body.name,
@@ -544,7 +542,6 @@ router.post("/create-pending", upload.any(), async (req, res) => {
       refundMode: body.refundMode,
       refundValue: body.refundValue,
 
-
       idProofPath: bookerFile.filename,
       guests,
 
@@ -554,7 +551,6 @@ router.post("/create-pending", upload.any(), async (req, res) => {
 
     await booking.save();
 
-    /* ---------- SEND RECEIPT EMAIL (NO PDF YET) ---------- */
     if (booking.email) {
       await sendEmail(
         booking.email,
@@ -580,10 +576,7 @@ router.post(
   upload.single("paymentProof"),
   async (req, res) => {
     try {
-      const booking = await Booking.findOne({
-        bookingId: req.params.bookingId
-      });
-
+      const booking = await Booking.findOne({ bookingId: req.params.bookingId });
       if (!booking) {
         return res.status(404).json({ error: "Booking not found" });
       }
@@ -602,26 +595,23 @@ router.post(
       const pdfPath = path.join(receiptDir, `${booking.bookingId}.pdf`);
       const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-      doc.pipe(fs.createWriteStream(receiptPdfPath));
+      doc.pipe(fs.createWriteStream(pdfPath)); // ✅ FIXED
 
-      /* ---------- BORDER ---------- */
       doc.rect(25, 25, 560, 792).stroke("#cccccc");
 
-      /* ---------- HEADER ---------- */
       doc.font("Helvetica-Bold")
-         .fontSize(20)
-         .text("Hotel Nupur Palace", { align: "center" });
+        .fontSize(20)
+        .text("Hotel Nupur Palace", { align: "center" });
 
       doc.moveDown(0.3);
       doc.fontSize(11)
-         .fillColor("gray")
-         .text("Booking Receipt (Pending Approval)", { align: "center" });
+        .fillColor("gray")
+        .text("Booking Receipt (Pending Approval)", { align: "center" });
 
       doc.moveDown(1);
       doc.moveTo(60, doc.y).lineTo(540, doc.y).stroke();
       doc.moveDown(1);
 
-      /* ---------- DETAILS ---------- */
       doc.fillColor("black").fontSize(12);
       doc.text(`Booking ID: ${booking.bookingId}`);
       doc.text(`Guest Name: ${booking.name}`);
@@ -634,40 +624,37 @@ router.post(
 
       doc.moveDown(1);
       doc.font("Helvetica-Bold")
-         .text("Status: PENDING ADMIN APPROVAL", { underline: true });
+        .text("Status: PENDING ADMIN APPROVAL", { underline: true });
 
       doc.moveDown(1);
       doc.font("Helvetica")
-         .fontSize(11)
-         .text(
-           "This receipt confirms payment and document submission.\n" +
-           "Final booking confirmation will be sent after admin verification.\n\n" +
-           "Please do NOT visit the hotel until confirmation is received."
-         );
+        .fontSize(11)
+        .text(
+          "This receipt confirms payment and document submission.\n" +
+          "Final booking confirmation will be sent after admin verification.\n\n" +
+          "Please do NOT visit the hotel until confirmation is received."
+        );
 
-      /* ---------- FOOTER ---------- */
       doc.moveDown(2);
       doc.fontSize(9)
-         .fillColor("gray")
-         .text(
-           "This is a system-generated receipt.\nHotel Nupur Palace",
-           { align: "center" }
-         );
+        .fillColor("gray")
+        .text(
+          "This is a system-generated receipt.\nHotel Nupur Palace",
+          { align: "center" }
+        );
 
       doc.end();
 
-      booking.receiptPdfPath = `receipts/${booking.bookingId}.pdf`;
+      booking.receiptPdfPath = pdfPath; // ✅ ABSOLUTE PATH
       await booking.save();
 
-      /* ===== SEND EMAIL TO USER (WITH PDF) ===== */
       await sendEmail(
         booking.email,
         booking.bookingId,
-        booking.receiptPdfPath,
+        pdfPath,          // ✅ FIXED
         "RECEIPT"
       );
 
-      /* ===== SEND OWNER EMAIL ===== */
       await sendOwnerEmail(booking);
 
       res.json({ success: true, bookingId: booking.bookingId });
