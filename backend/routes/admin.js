@@ -84,7 +84,8 @@ router.post("/approve/:bookingId", async (req, res) => {
 
     const pdfPath = path.join(pdfDir, `${booking.bookingId}.pdf`);
     const doc = new PDFDocument({ size: "A4", margin: 55 });
-    doc.pipe(fs.createWriteStream(pdfPath));
+    const writeStream = fs.createWriteStream(pdfPath);
+    doc.pipe(writeStream);
 
     /* ---------- PAGE BORDER ---------- */
     doc.rect(30, 30, 535, 782).stroke("#cccccc");
@@ -190,8 +191,8 @@ router.post("/approve/:bookingId", async (req, res) => {
 doc.end();
 
 await new Promise((resolve, reject) => {
-  doc.on("finish", resolve);
-  doc.on("error", reject);
+  writeStream.on("finish", resolve);
+  writeStream.on("error", reject);
 });
 
 await sendBrevoEmail({
@@ -261,6 +262,17 @@ router.post(
       }
 
       await booking.save();
+      let attachment = null;
+
+    if (booking.refundProofPath) {
+    attachment = path.join(__dirname, "..", "uploads", booking.refundProofPath);
+
+    if (!fs.existsSync(attachment)) {
+        console.error("Refund proof missing on disk:", attachment);
+        attachment = null;
+    }
+    }
+
 
       await sendBrevoEmail({
   to: booking.email,
