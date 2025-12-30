@@ -257,8 +257,6 @@ function closeRejectBox() {
 async function submitRejection() {
   const bookingId = document.getElementById("rejectBookingId").value;
   const reason = document.getElementById("rejectReason").value.trim();
-  const refundMode = document.getElementById("refundMode").value;
-  const refundValue = document.getElementById("refundValue").value.trim();
   const refundProof = document.getElementById("refundProof").files[0];
 
   if (!reason) {
@@ -268,8 +266,7 @@ async function submitRejection() {
 
   const fd = new FormData();
   fd.append("reason", reason);
-if (refundMode) fd.append("refundMode", refundMode);
-if (refundValue) fd.append("refundValue", refundValue);
+
 if (refundProof) fd.append("refundProof", refundProof);
 
 
