@@ -29,9 +29,14 @@
 
   <select id="roomFilter">
     <option value="">All Rooms</option>
-    <option>Deluxe</option>
-    <option>Super Deluxe</option>
-    <option>Family</option>
+    <option>Deluxe Room</option>
+    <option>Dormitory</option>
+    <option>Suite Room</option>
+    <option>Non-Attached Room</option>
+    <option>Attached Room</option>
+    <option>AC Room</option>
+    <option></option>
+
   </select>
 
   <select id="statusFilter">
@@ -145,7 +150,8 @@ async function loadBookings() {
                 <b>Guest ${i + 1}</b><br>
                 ${g.name}, ${g.age} (${g.relation})<br><br>
                <b>Guest ${i + 1} ID:</b> 
-               <a href="/uploads/${g.idProofPath}" target="_blank">View</a><br><br>
+               <a href="https://hotel-nupur-palace.onrender.com/uploads/${g.idProofPath}" target="_blank">View</a>
+
               `).join("")
                
               : "<small>No additional guests</small>"
@@ -155,19 +161,25 @@ async function loadBookings() {
         <!-- DOCUMENTS -->
         <td>
           <b>Primary ID:</b>
-          <a href="/uploads/${b.idProofPath}" target="_blank">View</a><br><br>
+          <a href="https://hotel-nupur-palace.onrender.com/uploads/${b.idProofPath}" 
+   target="_blank">View</a>
+
 
           ${
             b.paymentProofPath
               ? `<b>Payment Proof:</b>
-                 <a href="/uploads/${b.paymentProofPath}" target="_blank">View</a><br><br>`
+                 <a href="https://hotel-nupur-palace.onrender.com/uploads/${b.paymentProofPath}" 
+   target="_blank">View</a>
+`
               : `<small>No payment proof</small><br><br>`
           }
 
           ${
             b.refundProofPath
               ? `<b>Refund Proof:</b>
-                 <a href="/uploads/${b.refundProofPath}" target="_blank">View</a><br>`
+                 <a href="https://hotel-nupur-palace.onrender.com/uploads/${b.refundProofPath}" 
+   target="_blank">View</a>
+>`
               : ""
           }
         </td>
@@ -199,7 +211,7 @@ async function loadBookings() {
               : b.bookingStatus === "APPROVED"
                 ? `
                   ✅ Approved<br>
-                  <a href="/confirmations/${b.bookingId}.pdf" target="_blank">
+                  <a href="https://hotel-nupur-palace.onrender.com/confirmations/${b.bookingId}.pdf" target="_blank">
                     Download PDF
                   </a>
                 `
