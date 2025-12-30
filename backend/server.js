@@ -48,35 +48,30 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ================= PUBLIC CONTACT ROUTE (NO SESSION) ================= */
+/* ================= SESSION (ADMIN AUTH) ================= */
+app.use(
+  session({
+    name: "admin.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,     // ✅ SECURITY
+      secure: true,       // ✅ REQUIRED on Render
+      sameSite: "none"    // ✅ REQUIRED for GitHub Pages
+    }
+  })
+);
+
+/* ================= ROUTES ================= */
 app.use("/api/contact", contactRoutes);
-
-/* ================= SESSION (ADMIN ONLY) ================= */
-app.use(session({
-  name: "admin.sid",
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true,
-    sameSite: "none"
-  }
-}));
-
-/* ================= PROTECTED ROUTES ================= */
 app.use("/api/booking", bookingRoutes);
 app.use("/api/admin", adminRoutes);
-
 
 /* ================= STATIC FILES ================= */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/receipts", express.static(path.join(__dirname, "receipts")));
 app.use("/confirmations", express.static(path.join(__dirname, "confirmations")));
-
-/* ================= API ROUTES ================= */
-app.use("/api/booking", bookingRoutes);
-app.use("/api/contact", contactRoutes);
-app.use("/api/admin", adminRoutes);
 
 /* ================= DATABASE + SERVER ================= */
 (async () => {
