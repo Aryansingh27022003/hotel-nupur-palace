@@ -20,7 +20,7 @@ document.getElementById("contactForm").addEventListener("submit", async function
 
   try {
     const res = await fetch(
-      "https://hotel-nupur-backend.onrender.com/api/contact/send",
+      "https://hotel-nupur-palace.onrender.com/api/contact/send",
       {
         method: "POST",
         headers: {
