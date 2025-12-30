@@ -89,15 +89,7 @@ async function loadBookings() {
       params.append("to", to);
     }
 
-    const res = await fetch(`https://hotel-nupur-palace.onrender.com/api/admin/bookings?${params.toString()}`, {
-      credentials: "include"
-    });
 
-    if (!res.ok) {
-      alert("Unauthorized. Please login again.");
-      window.location.href = "/admin/login.html";
-      return;
-    }
 
     const data = await res.json();
     const tbody = document.getElementById("bookings");
