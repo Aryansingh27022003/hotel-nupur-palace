@@ -551,14 +551,6 @@ router.post("/create-pending", upload.any(), async (req, res) => {
 
     await booking.save();
 
-    if (booking.email) {
-      await sendEmail(
-        booking.email,
-        booking.bookingId,
-        null,
-        "RECEIPT"
-      );
-    }
 
     res.json({ success: true, bookingId });
 
