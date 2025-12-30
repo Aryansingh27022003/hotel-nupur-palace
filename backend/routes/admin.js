@@ -17,9 +17,7 @@ const upload = multer({
 
 /* ================= GET BOOKINGS (WITH FILTERS) ================= */
 router.get("/bookings", async (req, res) => {
-  if (!req.session.admin) {
-    return res.status(403).json({ error: "Unauthorized" });
-  }
+
 
   try {
     const { room, status, from, to, search } = req.query;
@@ -58,9 +56,7 @@ router.get("/bookings", async (req, res) => {
 
 /* ================= APPROVE BOOKING ================= */
 router.post("/approve/:bookingId", async (req, res) => {
-  if (!req.session.admin) {
-    return res.status(403).json({ error: "Unauthorized" });
-  }
+
 
   try {
     const booking = await Booking.findOne({
@@ -222,9 +218,7 @@ router.post(
   "/reject/:bookingId",
   upload.single("refundProof"),
   async (req, res) => {
-    if (!req.session.admin) {
-      return res.status(403).json({ error: "Unauthorized" });
-    }
+
 
     try {
       const { reason, refundMode, refundValue } = req.body;
