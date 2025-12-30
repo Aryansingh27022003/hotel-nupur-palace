@@ -1,5 +1,5 @@
 /* =========================================================
-   booking.js — FINAL CORRECT VERSION (NO CRASH)
+   booking.js — ONE GO SUBMIT (RELATION KEPT)
    ========================================================= */
 
 let bookingId = null;
@@ -18,6 +18,10 @@ if (!roomType || isNaN(basePrice)) {
 const roomInfo = document.getElementById("roomInfo");
 const nameInput = document.getElementById("name");
 const ageInput = document.getElementById("age");
+const bookerId = document.getElementById("bookerId");
+const emailInput = document.getElementById("email");
+const fromPlaceInput = document.getElementById("fromPlace");
+const purposeInput = document.getElementById("purpose");
 
 const checkInInput = document.getElementById("checkIn");
 const checkOutInput = document.getElementById("checkOut");
@@ -38,12 +42,13 @@ const qrImg = document.getElementById("upiQr");
 const payAmountSpan = document.getElementById("payAmount");
 const upiText = document.getElementById("upiText");
 
-const createBookingBtn = document.getElementById("createBookingBtn");
+const createBookingBtn = document.getElementById("createBookingBtn"); // KEPT (unused)
 const finalSubmitBtn = document.getElementById("finalSubmitBtn");
 const paymentProofInput = document.getElementById("paymentProof");
 
 /* ================= UI ================= */
 roomInfo.innerText = `Room Selected: ${roomType} | ₹${basePrice} / night`;
+paymentSection.style.display = "block";
 
 /* ================= DATE RULES ================= */
 const tomorrow = new Date();
@@ -75,7 +80,7 @@ sameAsMobile.addEventListener("change", () => {
   }
 });
 
-/* ================= GUEST DETAILS ================= */
+/* ================= GUEST DETAILS (RELATION LIST KEPT) ================= */
 guestsInput.addEventListener("change", () => {
   guestDetailsDiv.innerHTML = "";
   const count = parseInt(guestsInput.value || "0", 10);
@@ -116,73 +121,81 @@ guestsInput.addEventListener("change", () => {
   calculateTotal();
 });
 
-/* ================= TOTAL AMOUNT ================= */
+/* ================= VALIDATION ================= */
+function validatePrimaryForm() {
+  if (!nameInput.value.trim()) return alert("Enter full name"), false;
+  if (!ageInput.value || ageInput.value < 1) return alert("Enter valid age"), false;
+  if (!/^\d{10}$/.test(phoneInput.value)) return alert("Enter valid mobile"), false;
+  if (!emailInput.value.includes("@")) return alert("Enter valid email"), false;
+  if (!checkInInput.value || !checkOutInput.value) return alert("Select dates"), false;
+  if (!fromPlaceInput.value.trim()) return alert("Enter coming from"), false;
+  if (!purposeInput.value.trim()) return alert("Enter purpose"), false;
+  if (!bookerId.files[0]) return alert("Primary ID required"), false;
+  if (!refundUpiInput.value && !refundPhoneInput.value)
+    return alert("Refund details required"), false;
+  if (!paymentProofInput.files[0])
+    return alert("Upload payment proof"), false;
+  return true;
+}
+
+/* ================= TOTAL ================= */
 function calculateTotal() {
-  if (!checkInInput.value || !checkOutInput.value) {
-    totalAmountText.innerText = "";
-    return;
-  }
+  if (!checkInInput.value || !checkOutInput.value) return;
 
   const nights =
     (new Date(checkOutInput.value) - new Date(checkInInput.value)) /
     (1000 * 60 * 60 * 24);
-
-  if (nights <= 0) {
-    totalAmountText.innerText = "Invalid stay duration";
-    return;
-  }
 
   const guestCount = parseInt(guestsInput.value || "0", 10);
   payableAmount = (basePrice + guestCount * 200) * nights;
 
   totalAmountText.innerText =
     `Total Payable: ₹${payableAmount} (${nights} nights, ${guestCount} guests)`;
+
+  const upiId = "aryansingh27022003@oksbi";
+  upiText.innerText = upiId;
+  payAmountSpan.innerText = payableAmount;
+
+  const upiUrl =
+    `upi://pay?pa=${upiId}&pn=Hotel%20Nupur%20Palace&am=${payableAmount}&cu=INR`;
+
+  qrImg.src =
+    `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
 }
 
 /* =========================================================
-   STEP 1 — CREATE BOOKING
+   ONE BUTTON — CREATE + UPLOAD
    ========================================================= */
-createBookingBtn.onclick = async () => {
+finalSubmitBtn.onclick = async () => {
+  if (finalSubmitBtn.disabled) return;
+  if (!validatePrimaryForm()) return;
+
+  finalSubmitBtn.disabled = true;
+  finalSubmitBtn.innerText = "Submitting...";
+
   try {
-    if (!payableAmount) {
-      alert("Please select valid dates");
-      return;
-    }
-
-    if (!bookerId.files[0]) {
-      alert("Primary ID proof required");
-      return;
-    }
-
-    const refundUpi = refundUpiInput.value.trim();
-    const refundPhone = refundPhoneInput.value.trim();
-
-    if (!refundUpi && !refundPhone) {
-      alert("Please provide Refund UPI ID or Refund Phone Number");
-      return;
-    }
-
     const fd = new FormData();
+
     fd.append("name", nameInput.value.trim());
     fd.append("age", ageInput.value);
     fd.append("phone", phoneInput.value);
     fd.append("whatsapp", whatsappInput.value);
-    fd.append("email", email.value);
+    fd.append("email", emailInput.value);
     fd.append("roomType", roomType);
     fd.append("checkIn", checkInInput.value);
     fd.append("checkOut", checkOutInput.value);
-    fd.append("fromPlace", document.getElementById("fromPlace").value);
-    fd.append("purpose", document.getElementById("purpose").value);
+    fd.append("fromPlace", fromPlaceInput.value);
+    fd.append("purpose", purposeInput.value);
     fd.append("guests", guestsInput.value);
     fd.append("amount", payableAmount);
     fd.append("bookerId", bookerId.files[0]);
 
-    if (refundUpi) {
+    if (refundUpiInput.value) {
       fd.append("refundMode", "UPI");
-      fd.append("refundValue", refundUpi);
+      fd.append("refundValue", refundUpiInput.value);
     } else {
       fd.append("refundMode", "PHONE");
-      fd.append("refundValue", refundPhone);
+      fd.append("refundValue", refundPhoneInput.value);
     }
 
     const guestCount = parseInt(guestsInput.value || "0", 10);
@@ -193,62 +206,28 @@ createBookingBtn.onclick = async () => {
       fd.append(`guest_id_${i}`, document.querySelector(`[name="guest_id_${i}"]`).files[0]);
     }
 
-    const res = await fetch("https://hotel-nupur-palace.onrender.com/api/booking/create-pending", {
-      method: "POST",
-      body: fd
-    });
+    const createRes = await fetch(
+      "https://hotel-nupur-palace.onrender.com/api/booking/create-pending",
+      { method: "POST", body: fd }
+    );
 
-    if (!res.ok) throw new Error("Booking failed");
-
-    const data = await res.json();
+    const data = await createRes.json();
     bookingId = data.bookingId;
 
-    const upiId = "aryansingh27022003@oksbi";
-    const note = `Booking ${bookingId}`;
-    const upiUrl =
-      `upi://pay?pa=${upiId}&pn=Hotel%20Nupur%20Palace&am=${payableAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
+    const pf = new FormData();
+    pf.append("paymentProof", paymentProofInput.files[0]);
 
-    qrImg.src =
-      `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
+    await fetch(
+      `https://hotel-nupur-palace.onrender.com/api/booking/upload-payment-proof/${bookingId}`,
+      { method: "POST", body: pf }
+    );
 
-    upiText.innerText = upiId;
-    payAmountSpan.innerText = payableAmount;
-    paymentSection.style.display = "block";
+    window.location.href =
+      `/hotel-nupur-palace/receipt.html?bookingId=${bookingId}`;
 
-    alert("Booking created successfully. Please pay via QR and upload payment proof.");
-
-  } catch (err) {
-    console.error(err);
-    alert("Failed to create booking");
+  } catch {
+    finalSubmitBtn.disabled = false;
+    finalSubmitBtn.innerText = "Upload Payment Proof";
+    alert("Submission failed");
   }
-};
-
-/* =========================================================
-   STEP 2 — UPLOAD PAYMENT PROOF
-   ========================================================= */
-finalSubmitBtn.onclick = async () => {
-  if (!bookingId) {
-    alert("Booking not created");
-    return;
-  }
-
-  if (!paymentProofInput.files[0]) {
-    alert("Please upload payment proof");
-    return;
-  }
-
-  const fd = new FormData();
-  fd.append("paymentProof", paymentProofInput.files[0]);
-
-  const res = await fetch(`https://hotel-nupur-palace.onrender.com/api/booking/upload-payment-proof/${bookingId}`, {
-    method: "POST",
-    body: fd
-  });
-
-  if (!res.ok) {
-    alert("Failed to upload payment proof");
-    return;
-  }
-
-  window.location.href = `/hotel-nupur-palace/receipt.html?bookingId=${bookingId}`;
 };

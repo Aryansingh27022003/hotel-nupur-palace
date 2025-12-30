@@ -191,7 +191,6 @@ async function loadBookings() {
               ? `
                 <b>Reason:</b><br>
                 ${b.rejectionReason || "-"}<br><br>
-                <b>Refund To:</b> ${b.refundValue || "-"}
               `
               : "<small>—</small>"
           }
@@ -320,16 +319,7 @@ loadBookings();
     <label>Rejection Reason</label>
     <textarea id="rejectReason" rows="3"></textarea>
 
-    <label>Refund Mode</label>
-    <select id="refundMode">
-      <option value="">Select</option>
-      <option value="UPI">UPI</option>
-      <option value="PHONE">Phone</option>
-    </select>
-
-    <label>Refund To</label>
-    <input id="refundValue" placeholder="UPI ID or Phone Number">
-
+    
     <label>Refund Proof (Required)</label>
     <input type="file" id="refundProof" accept=".jpg,.jpeg,.png,.pdf">
 

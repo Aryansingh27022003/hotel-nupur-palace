@@ -16,7 +16,7 @@ if (!bookingId) {
   bookingIdEl.innerText = bookingId;
 
   // IMPORTANT: set download link
-  downloadBtn.href = `/receipts/${bookingId}.pdf`;
+  downloadBtn.href = `https://hotel-nupur-palace.onrender.com/receipts/${bookingId}.pdf`;
 
   // Optional: set filename explicitly
   downloadBtn.setAttribute("download", `${bookingId}-receipt.pdf`);

@@ -3,7 +3,7 @@ const Booking = require("../models/Booking");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-const sendBrevoEmail = require("../utils/sendBrevoEmail");
+const sendEmail = require("../utils/sendEmail");
 const multer = require("multer");
 
 const router = express.Router();
@@ -84,8 +84,7 @@ router.post("/approve/:bookingId", async (req, res) => {
 
     const pdfPath = path.join(pdfDir, `${booking.bookingId}.pdf`);
     const doc = new PDFDocument({ size: "A4", margin: 55 });
-    const writeStream = fs.createWriteStream(pdfPath);
-    doc.pipe(writeStream);
+    doc.pipe(fs.createWriteStream(pdfPath));
 
     /* ---------- PAGE BORDER ---------- */
     doc.rect(30, 30, 535, 782).stroke("#cccccc");
@@ -195,25 +194,31 @@ await new Promise((resolve, reject) => {
   writeStream.on("error", reject);
 });
 
-await sendBrevoEmail({
-  to: booking.email,
-  subject: "Booking Confirmed – Hotel Nupur Palace",
-  text: `
-Dear ${booking.name},
+// await sendBrevoEmail({
+//   to: booking.email,
+//   subject: "Booking Confirmed – Hotel Nupur Palace",
+//   text: `
+// Dear ${booking.name},
 
-Your booking has been APPROVED.
+// Your booking has been APPROVED.
 
-Booking ID: ${booking.bookingId}
-Room Type: ${booking.roomType}
-Check-in: ${booking.checkIn}
-Check-out: ${booking.checkOut}
+// Booking ID: ${booking.bookingId}
+// Room Type: ${booking.roomType}
+// Check-in: ${booking.checkIn}
+// Check-out: ${booking.checkOut}
 
-Please find the attached confirmation PDF.
+// Please find the attached confirmation PDF.
 
-Hotel Nupur Palace
-`,
-  attachmentPath: pdfPath
-});
+// Hotel Nupur Palace
+// `,
+//   attachmentPath: pdfPath
+// });
+await sendEmail(
+        booking.email,
+        booking.bookingId,
+        pdfPath,          // ✅ FIXED
+        "CONFIRMATION"
+      );
 
 
 
@@ -265,7 +270,7 @@ router.post(
       let attachment = null;
 
     if (booking.refundProofPath) {
-    attachment = path.join(__dirname, "..", "uploads", booking.refundProofPath);
+    pdfPath = path.join(__dirname, "..", "uploads", booking.refundProofPath);
 
     if (!fs.existsSync(attachment)) {
         console.error("Refund proof missing on disk:", attachment);
@@ -274,29 +279,34 @@ router.post(
     }
 
 
-      await sendBrevoEmail({
-  to: booking.email,
-  subject: "Booking Rejected – Hotel Nupur Palace",
-  text: `
-Dear ${booking.name},
+//       await sendBrevoEmail({
+//   to: booking.email,
+//   subject: "Booking Rejected – Hotel Nupur Palace",
+//   text: `
+// Dear ${booking.name},
 
-Your booking has been REJECTED.
+// Your booking has been REJECTED.
 
-Booking ID: ${booking.bookingId}
+// Booking ID: ${booking.bookingId}
 
-Reason:
-${booking.rejectionReason}
+// Reason:
+// ${booking.rejectionReason}
 
-Refund Status: ${booking.paymentStatus}
-Refund Mode: ${booking.refundMode || "Not processed"}
-Refund To: ${booking.refundValue || "Not processed"}
 
-Hotel Nupur Palace
-`,
-  attachmentPath: booking.refundProofPath
-    ? path.join(__dirname, "..", "uploads", booking.refundProofPath)
-    : null
-});
+
+// Hotel Nupur Palace
+// `,
+//   attachmentPath: booking.refundProofPath
+//     ? path.join(__dirname, "..", "uploads", booking.refundProofPath)
+//     : null
+// });
+    
+    await sendEmail(
+        booking.email,
+        booking.bookingId,
+        pdfPath,          // ✅ FIXED
+        "REJECTED"
+      );
 
 
 
