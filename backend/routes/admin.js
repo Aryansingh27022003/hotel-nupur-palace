@@ -8,6 +8,11 @@ const multer = require("multer");
 
 const router = express.Router();
 
+
+const uploadDir = path.join(__dirname, "..", "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 /* ================= MULTER (REFUND PROOF) ================= */
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "..", "uploads"),
@@ -256,17 +261,13 @@ router.post(
       booking.rejectionReason = reason.trim();
 
       /* ===== OPTIONAL REFUND HANDLING ===== */
-      if (refundMode && refundValue) {
-        booking.refundMode = refundMode;
-        booking.refundValue = refundValue;
+      if (req.file) {
+        booking.refundProofPath = req.file.filename;
         booking.paymentStatus = "REFUNDED";
-
-        if (req.file) {
-          booking.refundProofPath = req.file.filename;
+        } else {
+        booking.paymentStatus = "PAID";
         }
-      } else {
-        booking.paymentStatus = "PAID"; // rejected but not refunded yet
-      }
+
 
       await booking.save();
       let attachmentPath = null;
@@ -313,9 +314,11 @@ if (booking.refundProofPath) {
     await sendEmail(
   booking.email,
   booking.bookingId,
-  attachmentPath,   // ✅ correct
-  "REJECTED"
+  attachmentPath,
+  "REJECTED",
+  booking.rejectionReason
 );
+
 
 
 

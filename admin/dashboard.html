@@ -255,9 +255,19 @@ function closeRejectBox() {
 }
 
 async function submitRejection() {
-  const bookingId = document.getElementById("rejectBookingId").value;
-  const reason = document.getElementById("rejectReason").value.trim();
-  const refundProof = document.getElementById("refundProof").files[0];
+  const bookingIdInput = document.getElementById("rejectBookingId");
+  const reasonInput = document.getElementById("rejectReason");
+  const refundInput = document.getElementById("refundProof");
+
+  if (!bookingIdInput || !reasonInput || !refundInput) {
+    alert("Reject box not initialized properly");
+    return;
+  }
+
+  const bookingId = bookingIdInput.value;
+  const reason = reasonInput.value.trim();
+  const refundProof = refundInput.files[0];
+
 
   if (!reason) {
     alert("Reason is mandatory");

@@ -59,9 +59,12 @@ module.exports = async function sendEmail(
   /* ================= ATTACHMENT ================= */
   if (pdfPath && fs.existsSync(pdfPath)) {
     attachments.push({
-      content: fs.readFileSync(pdfPath).toString("base64"),
-      name: `${bookingId}.pdf`
+    content: fs.readFileSync(pdfPath).toString("base64"),
+    name: type === "REJECTED"
+        ? `refund-proof-${bookingId}${path.extname(pdfPath)}`
+        : `confirmation-${bookingId}.pdf`
     });
+
   }
 
   /* ================= SEND VIA BREVO ================= */
