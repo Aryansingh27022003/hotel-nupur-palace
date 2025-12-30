@@ -87,26 +87,35 @@ if (pdfPath && fs.existsSync(pdfPath)) {
 
 
   /* ================= SEND VIA BREVO ================= */
-  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": process.env.BREVO_API_KEY
-    },
-    body: JSON.stringify({
-      sender: {
-        email: process.env.BREVO_SENDER,
-        name: "Hotel Nupur Palace"
-      },
-      to: [{ email: to }],
-      subject,
-      htmlContent: html,
-      attachment: attachments
-    })
-  });
+/* ================= SEND VIA BREVO ================= */
 
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error("Brevo email failed: " + err);
-  }
+const payload = {
+  sender: {
+    email: process.env.BREVO_SENDER,
+    name: "Hotel Nupur Palace"
+  },
+  to: [{ email: to }],
+  subject,
+  htmlContent: html
+};
+
+// ✅ Add attachment ONLY if exists
+if (attachments.length > 0) {
+  payload.attachment = attachments;
+}
+
+const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "api-key": process.env.BREVO_API_KEY
+  },
+  body: JSON.stringify(payload)
+});
+
+if (!response.ok) {
+  const err = await response.text();
+  throw new Error("Brevo email failed: " + err);
+}
+
 };
