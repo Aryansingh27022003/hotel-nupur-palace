@@ -27,6 +27,11 @@ body {
     z-index: 10;
 }
 
+.navbar .container {
+    padding: 0 clamp(16px, 5%, 40px); /* min 16px, max 40px, scalable with viewport */
+}
+
+
 
 .nav-left {
     color: white;

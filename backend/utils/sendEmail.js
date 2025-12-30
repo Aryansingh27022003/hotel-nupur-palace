@@ -17,17 +17,19 @@ module.exports = async function sendEmail(
   if (type === "RECEIPT") {
     subject = "Booking Request Received | Hotel Nupur Palace";
     html = `
-      <p>Dear Guest,</p>
-      <p>Thank you for choosing <b>Hotel Nupur Palace</b>.</p>
-      <p>We have successfully received your booking request.</p>
-      <p><b>Booking ID:</b> ${bookingId}</p>
-      <p>
-        Our team is verifying your documents and payment.
-        You will receive confirmation within <b>1 hour</b>.
-      </p>
-      <p>Please do NOT visit the hotel until confirmation.</p>
-      <br>
-      <p>Warm regards,<br><b>Hotel Nupur Palace</b></p>
+      <div style="font-family: Arial, sans-serif; color: #333; max-width:600px; margin:auto; padding:20px; border:1px solid #e0e0e0; border-radius:8px;">
+        <h2 style="color:#b22222; text-align:center;">Hotel Nupur Palace</h2>
+        <p>Dear Guest,</p>
+        <p>Thank you for choosing <strong>Hotel Nupur Palace</strong>.</p>
+        <p>We have successfully received your booking request. Our team will review your details and confirm your booking shortly.</p>
+        <table style="width:100%; margin:15px 0; border-collapse: collapse;">
+          <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Booking ID:</strong></td><td style="padding:8px; border:1px solid #ddd;">${bookingId}</td></tr>
+        </table>
+        <p>Please do <strong>not visit the hotel</strong> until confirmation is received.</p>
+        <p>Warm regards,<br><strong>Hotel Nupur Palace</strong></p>
+        <hr style="border:none; border-top:1px solid #ccc;">
+        <small style="color:#777;">This is an automated message. Please do not reply.</small>
+      </div>
     `;
   }
 
@@ -35,12 +37,19 @@ module.exports = async function sendEmail(
   if (type === "CONFIRMATION") {
     subject = "Booking Confirmed | Hotel Nupur Palace";
     html = `
-      <p>Dear Guest,</p>
-      <p>Your booking has been <b>successfully confirmed</b>.</p>
-      <p><b>Booking ID:</b> ${bookingId}</p>
-      <p>Please find your confirmation attached.</p>
-      <br>
-      <p>Warm regards,<br><b>Hotel Nupur Palace</b></p>
+      <div style="font-family: Arial, sans-serif; color: #333; max-width:600px; margin:auto; padding:20px; border:1px solid #e0e0e0; border-radius:8px;">
+        <h2 style="color:#228B22; text-align:center;">Booking Confirmed!</h2>
+        <p>Dear Guest,</p>
+        <p>We are delighted to inform you that your booking has been <strong>successfully confirmed</strong>.</p>
+        <table style="width:100%; margin:15px 0; border-collapse: collapse;">
+          <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Booking ID:</strong></td><td style="padding:8px; border:1px solid #ddd;">${bookingId}</td></tr>
+        </table>
+        <p>Please find your booking confirmation attached with this email.</p>
+        <p>We look forward to welcoming you to <strong>Hotel Nupur Palace</strong>.</p>
+        <p>Warm regards,<br><strong>Hotel Nupur Palace</strong></p>
+        <hr style="border:none; border-top:1px solid #ccc;">
+        <small style="color:#777;">This is an automated message. Please do not reply.</small>
+      </div>
     `;
   }
 
@@ -48,24 +57,30 @@ module.exports = async function sendEmail(
   if (type === "REJECTED") {
     subject = "Booking Rejected | Hotel Nupur Palace";
     html = `
-      <p>Dear Guest,</p>
-      <p>Your booking (<b>${bookingId}</b>) could not be approved.</p>
-      <p><b>Reason:</b><br>${rejectionReason}</p>
-      <p>If payment was made, refund will be processed.</p>
-      <br>
-      <p>Warm regards,<br><b>Hotel Nupur Palace</b></p>
+      <div style="font-family: Arial, sans-serif; color: #333; max-width:600px; margin:auto; padding:20px; border:1px solid #e0e0e0; border-radius:8px;">
+        <h2 style="color:#b22222; text-align:center;">Booking Not Approved</h2>
+        <p>Dear Guest,</p>
+        <p>We regret to inform you that your booking (<strong>${bookingId}</strong>) could not be approved.</p>
+        <table style="width:100%; margin:15px 0; border-collapse: collapse;">
+          <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Reason:</strong></td><td style="padding:8px; border:1px solid #ddd;">${rejectionReason || "Not specified"}</td></tr>
+        </table>
+        <p>If you made a payment, please find the refund proof attached.</p>
+        <p>We apologize for any inconvenience caused and hope to serve you in the future.</p>
+        <p>Warm regards,<br><strong>Hotel Nupur Palace</strong></p>
+        <hr style="border:none; border-top:1px solid #ccc;">
+        <small style="color:#777;">This is an automated message. Please do not reply.</small>
+      </div>
     `;
   }
 
   /* ================= ATTACHMENT ================= */
   if (pdfPath && fs.existsSync(pdfPath)) {
     attachments.push({
-    content: fs.readFileSync(pdfPath).toString("base64"),
-    name: type === "REJECTED"
+      content: fs.readFileSync(pdfPath).toString("base64"),
+      name: type === "REJECTED"
         ? `refund-proof-${bookingId}${path.extname(pdfPath)}`
         : `confirmation-${bookingId}.pdf`
     });
-
   }
 
   /* ================= SEND VIA BREVO ================= */
