@@ -1,61 +1,34 @@
-const express = require("express");
+document.getElementById("contactForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-const router = express.Router();
+  const email = document.getElementById("email").value;
+  const message = document.getElementById("message").value;
+  const status = document.getElementById("contactStatus");
 
-/* ================= TEST ROUTE ================= */
-router.get("/test", (req, res) => {
-  res.json({ contact: "route working" });
-});
+  status.innerText = "Sending...";
+  status.style.color = "black";
 
-/* ================= SEND CONTACT MESSAGE ================= */
-router.post("/send", async (req, res) => {
   try {
-    const { email, message } = req.body;
+    const res = await fetch(
+      "https://hotel-nupur-palace.onrender.com/api/contact/send",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message })
+      }
+    );
 
-    if (!email || !message) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing email or message"
-      });
+    if (!res.ok) {
+      throw new Error("Server error");
     }
 
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.BREVO_API_KEY
-      },
-      body: JSON.stringify({
-        sender: {
-          email: process.env.BREVO_SENDER,
-          name: "Hotel Nupur Palace"
-        },
-        to: [
-          { email: "uttamnupur@gmail.com" }
-        ],
-        replyTo: { email },
-        subject: "New Contact Message - Hotel Nupur Palace",
-        textContent: `From: ${email}\n\nMessage:\n${message}`
-      })
-    });
-
-    const data = await response.text(); // IMPORTANT
-
-    if (!response.ok) {
-      console.error("❌ Brevo response:", data);
-      return res.status(500).json({
-        success: false,
-        error: "Email service failed"
-      });
-    }
-
-    console.log("✅ Email sent via Brevo");
-    return res.status(200).json({ success: true });
+    status.innerText = "Thank you! Your message has been sent.";
+    status.style.color = "green";
+    document.getElementById("contactForm").reset();
 
   } catch (err) {
-    console.error("❌ Brevo API error:", err);
-    return res.status(500).json({ success: false });
+    console.error("Contact form error:", err);
+    status.innerText = "Failed to send message. Please try again.";
+    status.style.color = "red";
   }
 });
-
-module.exports = router;
