@@ -55,36 +55,32 @@
 
             <p id="totalAmount"></p>
 
-              <div style="margin-top:20px;border-top:1px dashed #ccc;padding-top:15px;">
+            <!-- REFUND DETAILS -->
+            <div style="margin-top:20px;border-top:1px dashed #ccc;padding-top:15px;">
 
-              <h3>Refund Details (Required if booking is rejected)</h3>
+                <h3>Refund Details (Required if booking is rejected)</h3>
 
-              <p style="font-size:13px;color:#555">
-              In case your booking is rejected, refund will be sent to the details below.
-              </p>
+                <p style="font-size:13px;color:#555">
+                    In case your booking is rejected, refund will be sent to the details below.
+                </p>
 
-              <input
-              type="text"
-              id="refundUpi"
-              placeholder="Refund UPI ID (e.g. xxxxxxxx@okxxxx)">
+                <input
+                    type="text"
+                    id="refundUpi"
+                    placeholder="Refund UPI ID (e.g. xxxxxxxx@okxxxx)">
 
-              <p style="text-align:center;margin:8px 0;">OR</p>
+                <p style="text-align:center;margin:8px 0;">OR</p>
 
-              <input
-              type="tel"
-              id="refundPhone"
-              placeholder="Refund Phone Number (10 digits)"
-              maxlength="10">
+                <input
+                    type="tel"
+                    id="refundPhone"
+                    placeholder="Refund Phone Number (10 digits)"
+                    maxlength="10">
+            </div>
 
-              </div>
-
-            <button id="createBookingBtn" class="btn">
-                Submit Booking Request
-            </button>
-
-            <!-- PAYMENT SECTION -->
+            <!-- PAYMENT SECTION (ALWAYS VISIBLE) -->
             <div id="paymentInstructions"
-                 style="display:none;margin-top:25px;border-top:1px solid #ddd;padding-top:15px;">
+                 style="margin-top:25px;border-top:1px solid #ddd;padding-top:15px;">
 
                 <h3>Payment Instructions</h3>
 
@@ -107,11 +103,12 @@
                 <label>Upload Payment Screenshot / UTR</label>
                 <input type="file" id="paymentProof" accept=".jpg,.jpeg,.png,.pdf" required>
 
-                <button id="finalSubmitBtn" class="btn" style="margin-top:10px;">
-                    Upload Payment Proof
+                <!-- SINGLE FINAL BUTTON -->
+                <button id="finalSubmitBtn" class="btn" style="margin-top:15px;">
+                    Submit Booking
                 </button>
             </div>
-           
+
         </div>
     </div>
 </section>
