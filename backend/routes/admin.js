@@ -273,48 +273,17 @@ router.post(
       let attachmentPath = null;
 
 if (booking.refundProofPath) {
-  const possiblePath = path.join(
-    __dirname,
-    "..",
-    "uploads",
-    booking.refundProofPath
-  );
-
+  const possiblePath = path.join(__dirname, "..", "uploads", booking.refundProofPath);
   if (fs.existsSync(possiblePath)) {
-    attachmentPath = possiblePath;
-  } else {
-    console.error("Refund proof missing on disk:", possiblePath);
+    attachmentPath = possiblePath; // optional attachment
   }
 }
 
-
-
-//       await sendBrevoEmail({
-//   to: booking.email,
-//   subject: "Booking Rejected – Hotel Nupur Palace",
-//   text: `
-// Dear ${booking.name},
-
-// Your booking has been REJECTED.
-
-// Booking ID: ${booking.bookingId}
-
-// Reason:
-// ${booking.rejectionReason}
-
-
-
-// Hotel Nupur Palace
-// `,
-//   attachmentPath: booking.refundProofPath
-//     ? path.join(__dirname, "..", "uploads", booking.refundProofPath)
-//     : null
-// });
-    
-    await sendEmail(
+// sendEmail call
+await sendEmail(
   booking.email,
   booking.bookingId,
-  attachmentPath,
+  attachmentPath,  // can be null
   "REJECTED",
   booking.rejectionReason
 );

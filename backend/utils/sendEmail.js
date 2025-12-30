@@ -74,14 +74,17 @@ module.exports = async function sendEmail(
   }
 
   /* ================= ATTACHMENT ================= */
-  if (pdfPath && fs.existsSync(pdfPath)) {
-    attachments.push({
-      content: fs.readFileSync(pdfPath).toString("base64"),
-      name: type === "REJECTED"
-        ? `refund-proof-${bookingId}${path.extname(pdfPath)}`
-        : `confirmation-${bookingId}.pdf`
-    });
-  }
+  /* ================= ATTACHMENT ================= */
+if (pdfPath && fs.existsSync(pdfPath)) {
+  attachments.push({
+    content: fs.readFileSync(pdfPath).toString("base64"),
+    name: type === "REJECTED"
+      ? `refund-proof-${bookingId}${path.extname(pdfPath)}`
+      : `confirmation-${bookingId}.pdf`
+  });
+} 
+// If pdfPath doesn't exist, attachments remains empty. No problem, email still sends.
+
 
   /* ================= SEND VIA BREVO ================= */
   const response = await fetch("https://api.brevo.com/v3/smtp/email", {
