@@ -3,23 +3,23 @@ const nodemailer = require("nodemailer");
 
 const router = express.Router();
 
+/* ================= TEST ROUTE ================= */
 router.get("/test", (req, res) => {
   res.json({ contact: "route working" });
 });
 
+/* ================= BREVO SMTP TRANSPORTER ================= */
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  host: process.env.SMTP_HOST,        // smtp-relay.brevo.com
+  port: Number(process.env.SMTP_PORT),// 587
+  secure: false,                      // MUST be false for 587
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000
+    user: process.env.SMTP_USER,      // 9eff14001@smtp-brevo.com
+    pass: process.env.SMTP_PASS       // Brevo SMTP KEY
+  }
 });
 
+/* ================= SEND CONTACT MESSAGE ================= */
 router.post("/send", async (req, res) => {
   try {
     const { email, message } = req.body;
@@ -29,18 +29,18 @@ router.post("/send", async (req, res) => {
     }
 
     await transporter.sendMail({
-      from: `"Hotel Nupur Palace Website" <${process.env.EMAIL_USER}>`,
+      from: `"Hotel Nupur Palace Website" <${process.env.SMTP_USER}>`,
       to: "uttamnupur@gmail.com",
       replyTo: email,
       subject: "New Contact Message - Hotel Nupur Palace",
       text: `From: ${email}\n\nMessage:\n${message}`
     });
 
-    res.status(200).json({ success: true });
+    return res.status(200).json({ success: true });
 
   } catch (err) {
     console.error("❌ Email error:", err);
-    res.status(500).json({ success: false });
+    return res.status(500).json({ success: false });
   }
 });
 
