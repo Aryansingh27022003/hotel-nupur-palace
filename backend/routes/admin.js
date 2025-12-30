@@ -269,16 +269,23 @@ router.post(
       }
 
       await booking.save();
-      let attachment = null;
+      let attachmentPath = null;
 
-    if (booking.refundProofPath) {
-    pdfPath = path.join(__dirname, "..", "uploads", booking.refundProofPath);
+if (booking.refundProofPath) {
+  const possiblePath = path.join(
+    __dirname,
+    "..",
+    "uploads",
+    booking.refundProofPath
+  );
 
-    if (!fs.existsSync(attachment)) {
-        console.error("Refund proof missing on disk:", attachment);
-        attachment = null;
-    }
-    }
+  if (fs.existsSync(possiblePath)) {
+    attachmentPath = possiblePath;
+  } else {
+    console.error("Refund proof missing on disk:", possiblePath);
+  }
+}
+
 
 
 //       await sendBrevoEmail({
@@ -304,11 +311,11 @@ router.post(
 // });
     
     await sendEmail(
-        booking.email,
-        booking.bookingId,
-        pdfPath,          // ✅ FIXED
-        "REJECTED"
-      );
+  booking.email,
+  booking.bookingId,
+  attachmentPath,   // ✅ correct
+  "REJECTED"
+);
 
 
 
