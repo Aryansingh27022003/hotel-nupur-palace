@@ -1,47 +1,61 @@
-document.getElementById("contactForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
+const express = require("express");
 
-  const emailInput = document.getElementById("email");
-  const messageInput = document.getElementById("message");
-  const status = document.getElementById("contactStatus");
+const router = express.Router();
 
-  const email = emailInput.value.trim();
-  const message = messageInput.value.trim();
+/* ================= TEST ROUTE ================= */
+router.get("/test", (req, res) => {
+  res.json({ contact: "route working" });
+});
 
-  // 🔐 Basic validation
-  if (!email || !message) {
-    status.innerText = "Please fill in all fields.";
-    status.style.color = "red";
-    return;
-  }
-
-  status.innerText = "Sending message...";
-  status.style.color = "black";
-
+/* ================= SEND CONTACT MESSAGE ================= */
+router.post("/send", async (req, res) => {
   try {
-    const res = await fetch(
-      "https://hotel-nupur-palace.onrender.com/api/contact/send",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, message })
-      }
-    );
+    const { email, message } = req.body;
 
-    if (!res.ok) {
-      throw new Error("Server responded with error");
+    if (!email || !message) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing email or message"
+      });
     }
 
-    status.innerText = "Thank you! Your message has been sent.";
-    status.style.color = "green";
-    document.getElementById("contactForm").reset();
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY
+      },
+      body: JSON.stringify({
+        sender: {
+          email: process.env.BREVO_SENDER,
+          name: "Hotel Nupur Palace"
+        },
+        to: [
+          { email: "uttamnupur@gmail.com" }
+        ],
+        replyTo: { email },
+        subject: "New Contact Message - Hotel Nupur Palace",
+        textContent: `From: ${email}\n\nMessage:\n${message}`
+      })
+    });
+
+    const data = await response.text(); // IMPORTANT
+
+    if (!response.ok) {
+      console.error("❌ Brevo response:", data);
+      return res.status(500).json({
+        success: false,
+        error: "Email service failed"
+      });
+    }
+
+    console.log("✅ Email sent via Brevo");
+    return res.status(200).json({ success: true });
 
   } catch (err) {
-    console.error("Contact form error:", err);
-    status.innerText =
-      "Unable to send message right now. Please try again later.";
-    status.style.color = "red";
+    console.error("❌ Brevo API error:", err);
+    return res.status(500).json({ success: false });
   }
 });
+
+module.exports = router;
