@@ -17,23 +17,28 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 
 
-function uploadBufferToCloudinary(buffer, folder, filename) {
+function uploadBufferToCloudinary(buffer, folder, filename, mimetype) {
   return new Promise((resolve, reject) => {
+    const isPdf = mimetype === "application/pdf";
+
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
         public_id: filename,
-        resource_type: "auto"
+        resource_type: isPdf ? "raw" : "image",
+        use_filename: true,
+        unique_filename: false
       },
       (error, result) => {
-        if (result) resolve(result);
-        else reject(error);
+        if (error) reject(error);
+        else resolve(result);
       }
     );
 
     streamifier.createReadStream(buffer).pipe(stream);
   });
 }
+
 
 
 /* ================= GET BOOKINGS (WITH FILTERS) ================= */
@@ -93,13 +98,12 @@ router.post("/approve/:bookingId", async (req, res) => {
     await booking.save();
 
     /* ================= PREMIUM CONFIRMATION PDF ================= */
-    const pdfDir = path.join(__dirname, "..", "confirmations");
-    if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir);
+   
 
-    const pdfPath = path.join(pdfDir, `${booking.bookingId}.pdf`);
+    
     const doc = new PDFDocument({ size: "A4", margin: 55 });
-    const writeStream = fs.createWriteStream(pdfPath);
-    doc.pipe(writeStream);
+    
+    
 
 
     /* ---------- PAGE BORDER ---------- */
@@ -203,52 +207,36 @@ router.post("/approve/:bookingId", async (req, res) => {
         { align: "center" }
       );
 
-doc.end();
+const buffers = [];
+doc.on("data", buffers.push.bind(buffers));
 
-await new Promise((resolve, reject) => {
-  writeStream.on("finish", resolve);
-  writeStream.on("error", reject);
-});
-const pdfBuffer = fs.readFileSync(pdfPath);
+doc.on("end", async () => {
+  const pdfBuffer = Buffer.concat(buffers);
 
-const confirmationUpload = await uploadBufferToCloudinary(
+  const confirmationUpload = await uploadBufferToCloudinary(
   pdfBuffer,
   "bookings/confirmations",
-  booking.bookingId
-);
-
-booking.confirmationPdfPath = confirmationUpload.secure_url;
-await booking.save();
-
-// await sendBrevoEmail({
-//   to: booking.email,
-//   subject: "Booking Confirmed – Hotel Nupur Palace",
-//   text: `
-// Dear ${booking.name},
-
-// Your booking has been APPROVED.
-
-// Booking ID: ${booking.bookingId}
-// Room Type: ${booking.roomType}
-// Check-in: ${booking.checkIn}
-// Check-out: ${booking.checkOut}
-
-// Please find the attached confirmation PDF.
-
-// Hotel Nupur Palace
-// `,
-//   attachmentPath: pdfPath
-// });
-await sendEmail(
-        booking.email,
-        booking.bookingId,
-        pdfPath,          // ✅ FIXED
-        "CONFIRMATION"
-      );
+  `${booking.bookingId}.pdf`,   // ✅ ADD .pdf
+  "application/pdf"
+  );
 
 
+  booking.confirmationPdfPath = confirmationUpload.secure_url;
+  await booking.save();
 
-    res.json({ success: true });
+  await sendEmail(
+    booking.email,
+    booking.bookingId,
+    null,
+    "CONFIRMATION"
+  );
+
+  res.json({ success: true });
+});
+
+doc.end();
+
+
 
   } catch (err) {
     console.error("Approve error:", err);
@@ -282,17 +270,18 @@ router.post(
       /* ===== OPTIONAL REFUND HANDLING ===== */
       if (req.file) {
         const refundUpload = await uploadBufferToCloudinary(
-        fs.readFileSync(req.file.path),
-        "bookings/refunds",
-        `${booking.bookingId}-refund`
+            req.file.buffer,
+            "bookings/refunds",
+            `${booking.bookingId}-refund`,
+            req.file.mimetype
         );
 
         booking.refundProofPath = refundUpload.secure_url;
         booking.paymentStatus = "REFUNDED";
-        fs.unlinkSync(req.file.path);
-        } else {
-        booking.paymentStatus = "PAID";
         }
+        else {
+                booking.paymentStatus = "PAID";
+         }
 
 
       await booking.save();

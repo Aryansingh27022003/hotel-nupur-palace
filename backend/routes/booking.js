@@ -494,20 +494,23 @@ const upload = multer({
 
 function uploadToCloudinary(file, folder) {
   return new Promise((resolve, reject) => {
+    const isPdf = file.mimetype === "application/pdf";
+
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
-        resource_type: "auto"
+        resource_type: isPdf ? "raw" : "image"
       },
       (error, result) => {
-        if (result) resolve(result);
-        else reject(error);
+        if (error) reject(error);
+        else resolve(result);
       }
     );
 
     streamifier.createReadStream(file.buffer).pipe(stream);
   });
 }
+
 
 /* ================= BOOKING ID ================= */
 function generateBookingId() {
