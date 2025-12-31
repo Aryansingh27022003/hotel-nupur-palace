@@ -84,7 +84,7 @@ app.use((err, req, res, next) => {
 
 
 /* ================= STATIC FILES ================= */
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/receipts", express.static(path.join(__dirname, "receipts")));
 app.use("/confirmations", express.static(path.join(__dirname, "confirmations")));
 

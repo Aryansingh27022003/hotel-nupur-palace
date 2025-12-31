@@ -13,15 +13,8 @@ const router = express.Router();
 
 
 /* ================= MULTER (REFUND PROOF) ================= */
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, "..", "uploads"),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + "-" + file.fieldname + ext);
-  }
-});
+const upload = multer({ storage: multer.memoryStorage() });
 
-const upload = multer({ storage });
 
 
 function uploadBufferToCloudinary(buffer, folder, filename) {
