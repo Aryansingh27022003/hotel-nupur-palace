@@ -76,13 +76,16 @@
 </table>
 
 
+
+
+<script>
+  
 function fixUrl(url) {
   if (!url) return "#";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   return "https://" + url;
 }
 
-<script>
 async function loadBookings() {
   try {
     const params = new URLSearchParams();
