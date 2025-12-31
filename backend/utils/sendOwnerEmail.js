@@ -26,7 +26,7 @@ async function sendOwnerEmail(booking) {
         name: "Hotel Nupur Palace"
       },
       to: [
-        { email: "asinghrajput135@gmail.com" } // OWNER EMAIL
+        { email: "palacehotelnupur@gmail.com" } // OWNER EMAIL
       ],
       subject: `New Booking: ${booking.bookingId}`,
       htmlContent: html
