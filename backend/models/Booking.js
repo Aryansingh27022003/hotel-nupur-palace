@@ -63,7 +63,10 @@ const BookingSchema = new mongoose.Schema({
 
   refundValue: String,          // UPI ID or Phone number
 
-  refundProofPath: String,      // admin uploaded refund screenshot
+  refundProofPath: String,
+  confirmationPdfPath: String,
+
+    
 
   createdAt: {
     type: Date,

@@ -68,6 +68,21 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/booking", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 
+const multer = require("multer");
+
+/* ================= MULTER ERROR HANDLER ================= */
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        error: "File size must be less than 10 MB"
+      });
+    }
+  }
+  next(err);
+});
+
+
 /* ================= STATIC FILES ================= */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/receipts", express.static(path.join(__dirname, "receipts")));

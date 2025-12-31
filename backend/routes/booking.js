@@ -480,21 +480,34 @@ const PDFDocument = require("pdfkit");
 const Booking = require("../models/Booking");
 const sendOwnerEmail = require("../utils/sendOwnerEmail");
 const sendEmail = require("../utils/sendEmail");
+const cloudinary = require("../utils/cloudinary");
+const streamifier = require("streamifier");
 
 
 
 const router = express.Router();
 
-/* ================= MULTER CONFIG ================= */
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, "..", "uploads"),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname); // keeps .jpg/.pdf
-    cb(null, Date.now() + "-" + file.fieldname + ext);
-  }
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB (Cloudinary free limit)
 });
 
-const upload = multer({ storage });
+function uploadToCloudinary(file, folder) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "auto"
+      },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(file.buffer).pipe(stream);
+  });
+}
 
 /* ================= BOOKING ID ================= */
 function generateBookingId() {
@@ -517,16 +530,32 @@ router.post("/create-pending", upload.any(), async (req, res) => {
       return res.status(400).json({ error: "Primary ID proof required" });
     }
 
+    // Upload booker ID
+    const bookerUpload = await uploadToCloudinary(
+      bookerFile,
+      "bookings/booker-ids"
+    );
+
     const guestCount = parseInt(body.guests || "0", 10);
     const guests = [];
 
     for (let i = 1; i <= guestCount; i++) {
       const guestIdFile = files.find(f => f.fieldname === `guest_id_${i}`);
+
+      let guestIdUrl = null;
+      if (guestIdFile) {
+        const guestUpload = await uploadToCloudinary(
+          guestIdFile,
+          "bookings/guest-ids"
+        );
+        guestIdUrl = guestUpload.secure_url;
+      }
+
       guests.push({
         name: body[`guest_name_${i}`],
         age: body[`guest_age_${i}`],
         relation: body[`guest_relation_${i}`],
-        idProofPath: guestIdFile ? guestIdFile.filename : null
+        idProofPath: guestIdUrl
       });
     }
 
@@ -548,7 +577,7 @@ router.post("/create-pending", upload.any(), async (req, res) => {
       refundMode: body.refundMode,
       refundValue: body.refundValue,
 
-      idProofPath: bookerFile.filename,
+      idProofPath: bookerUpload.secure_url,
       guests,
 
       bookingStatus: "PENDING_APPROVAL",
@@ -556,8 +585,6 @@ router.post("/create-pending", upload.any(), async (req, res) => {
     });
 
     await booking.save();
-
-
     res.json({ success: true, bookingId });
 
   } catch (err) {
@@ -565,6 +592,7 @@ router.post("/create-pending", upload.any(), async (req, res) => {
     res.status(500).json({ error: "Failed to create booking" });
   }
 });
+
 
 /* ======================================================
    STEP 2️⃣ UPLOAD PAYMENT PROOF + GENERATE RECEIPT
@@ -583,7 +611,13 @@ router.post(
         return res.status(400).json({ error: "Payment proof required" });
       }
 
-      booking.paymentProofPath = req.file.filename;
+      const paymentUpload = await uploadToCloudinary(
+      req.file,
+      "bookings/payment-proofs"
+    );
+
+    booking.paymentProofPath = paymentUpload.secure_url;
+
       booking.paymentStatus = "PAID";
 
       /* ===== GENERATE RECEIPT PDF ===== */

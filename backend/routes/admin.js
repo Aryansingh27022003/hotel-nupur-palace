@@ -5,14 +5,13 @@ const fs = require("fs");
 const path = require("path");
 const sendEmail = require("../utils/sendEmail");
 const multer = require("multer");
+const cloudinary = require("../utils/cloudinary");
+const streamifier = require("streamifier");
 
 const router = express.Router();
 
 
-const uploadDir = path.join(__dirname, "..", "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
+
 /* ================= MULTER (REFUND PROOF) ================= */
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "..", "uploads"),
@@ -25,6 +24,23 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+function uploadBufferToCloudinary(buffer, folder, filename) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        public_id: filename,
+        resource_type: "auto"
+      },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+}
 
 
 /* ================= GET BOOKINGS (WITH FILTERS) ================= */
@@ -200,6 +216,16 @@ await new Promise((resolve, reject) => {
   writeStream.on("finish", resolve);
   writeStream.on("error", reject);
 });
+const pdfBuffer = fs.readFileSync(pdfPath);
+
+const confirmationUpload = await uploadBufferToCloudinary(
+  pdfBuffer,
+  "bookings/confirmations",
+  booking.bookingId
+);
+
+booking.confirmationPdfPath = confirmationUpload.secure_url;
+await booking.save();
 
 // await sendBrevoEmail({
 //   to: booking.email,
@@ -262,8 +288,15 @@ router.post(
 
       /* ===== OPTIONAL REFUND HANDLING ===== */
       if (req.file) {
-        booking.refundProofPath = req.file.filename;
+        const refundUpload = await uploadBufferToCloudinary(
+        fs.readFileSync(req.file.path),
+        "bookings/refunds",
+        `${booking.bookingId}-refund`
+        );
+
+        booking.refundProofPath = refundUpload.secure_url;
         booking.paymentStatus = "REFUNDED";
+        fs.unlinkSync(req.file.path);
         } else {
         booking.paymentStatus = "PAID";
         }
@@ -272,12 +305,7 @@ router.post(
       await booking.save();
       let attachmentPath = null;
 
-if (booking.refundProofPath) {
-  const possiblePath = path.join(__dirname, "..", "uploads", booking.refundProofPath);
-  if (fs.existsSync(possiblePath)) {
-    attachmentPath = possiblePath; // optional attachment
-  }
-}
+
 
 // sendEmail call
 await sendEmail(
