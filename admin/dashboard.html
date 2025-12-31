@@ -75,6 +75,13 @@
   </tbody>
 </table>
 
+
+function fixUrl(url) {
+  if (!url) return "#";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return "https://" + url;
+}
+
 <script>
 async function loadBookings() {
   try {
@@ -150,7 +157,8 @@ async function loadBookings() {
                 <b>Guest ${i + 1}</b><br>
                 ${g.name}, ${g.age} (${g.relation})<br><br>
                <b>Guest ${i + 1} ID:</b> 
-               <a href="https://hotel-nupur-palace.onrender.com/uploads/${g.idProofPath}" target="_blank">View</a>
+               <a href="${fixUrl(g.idProofPath)}" target="_blank">View</a>
+
 
               `).join("")
                
@@ -161,15 +169,15 @@ async function loadBookings() {
         <!-- DOCUMENTS -->
         <td>
           <b>Primary ID:</b>
-          <a href="https://hotel-nupur-palace.onrender.com/uploads/${b.idProofPath}" 
-   target="_blank">View</a>
+          <a href="${fixUrl(b.idProofPath)}" target="_blank">View</a>
+
 
 
           ${
             b.paymentProofPath
               ? `<b>Payment Proof:</b>
-                 <a href="https://hotel-nupur-palace.onrender.com/uploads/${b.paymentProofPath}" 
-   target="_blank">View</a>
+                 <a href="${fixUrl(b.paymentProofPath)}" target="_blank">View</a>
+
 `
               : `<small>No payment proof</small><br><br>`
           }
@@ -177,8 +185,8 @@ async function loadBookings() {
           ${
             b.refundProofPath
               ? `<b>Refund Proof:</b>
-                 <a href="https://hotel-nupur-palace.onrender.com/uploads/${b.refundProofPath}" 
-   target="_blank">View</a>
+                 <a href="${fixUrl(b.refundProofPath)}" target="_blank">View</a>
+
 `
               : ""
           }
@@ -210,9 +218,9 @@ async function loadBookings() {
               : b.bookingStatus === "APPROVED"
                 ? `
                   ✅ Approved<br>
-                  <a href="https://hotel-nupur-palace.onrender.com/confirmations/${b.bookingId}.pdf" target="_blank">
-                    Download PDF
-                  </a>
+                  <a href="${fixUrl(b.confirmationPdfPath)}" target="_blank">Download PDF</a>
+
+
                 `
                 : "❌ Rejected"
           }
@@ -276,8 +284,13 @@ async function submitRejection() {
 
   const fd = new FormData();
   fd.append("reason", reason);
-
+if (refundProof && refundProof.size > 10 * 1024 * 1024) {
+  alert("Refund proof must be less than 10MB");
+  return;
+}
 if (refundProof) fd.append("refundProof", refundProof);
+
+
 
 
   const res = await fetch(`https://hotel-nupur-palace.onrender.com/api/admin/reject/${bookingId}`, {
@@ -298,6 +311,8 @@ if (refundProof) fd.append("refundProof", refundProof);
 
 
 /* AUTO LOAD */
+
+
 loadBookings();
 </script>
 <!-- ================= REJECTION MODAL ================= -->
