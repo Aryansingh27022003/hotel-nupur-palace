@@ -486,9 +486,15 @@ const sendEmail = require("../utils/sendEmail");
 const router = express.Router();
 
 /* ================= MULTER CONFIG ================= */
-const upload = multer({
-  dest: path.join(__dirname, "..", "uploads")
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "..", "uploads"),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname); // keeps .jpg/.pdf
+    cb(null, Date.now() + "-" + file.fieldname + ext);
+  }
 });
+
+const upload = multer({ storage });
 
 /* ================= BOOKING ID ================= */
 function generateBookingId() {
