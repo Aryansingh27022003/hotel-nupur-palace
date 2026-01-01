@@ -21,11 +21,15 @@ function uploadBufferToCloudinary(buffer, folder, filename, mimetype) {
   return new Promise((resolve, reject) => {
     const isPdf = mimetype === "application/pdf";
 
+    const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+    const format = isPdf ? "pdf" : filename.split(".").pop();
+
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
-        public_id: filename,
         resource_type: isPdf ? "raw" : "image",
+        public_id: nameWithoutExt,
+        format: format,
         use_filename: true,
         unique_filename: false
       },
@@ -270,11 +274,12 @@ router.post(
       /* ===== OPTIONAL REFUND HANDLING ===== */
       if (req.file) {
         const refundUpload = await uploadBufferToCloudinary(
-            req.file.buffer,
-            "bookings/refunds",
-            `${booking.bookingId}-refund`,
-            req.file.mimetype
+        req.file.buffer,
+        "bookings/refunds",
+        `${booking.bookingId}-refund.${req.file.originalname.split(".").pop()}`,
+        req.file.mimetype
         );
+
 
         booking.refundProofPath = refundUpload.secure_url;
         booking.paymentStatus = "REFUNDED";
