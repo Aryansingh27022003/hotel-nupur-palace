@@ -651,8 +651,4 @@ iframe {
   }
 }
 
-@media (hover: none) {
-  .room-image:hover .flip-inner {
-    transform: none;
-  }
-}
+
