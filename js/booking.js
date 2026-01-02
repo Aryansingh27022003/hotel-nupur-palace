@@ -7,12 +7,21 @@ let payableAmount = 0;
 
 /* ================= ROOM DATA ================= */
 const roomType = localStorage.getItem("roomType");
+const guestSection = document.getElementById("guestSection");
+
+// Hide guest selection for Dormitory
+if (roomType === "Dormitory") {
+  guestSection.style.display = "none";
+  guestsInput.value = "0";
+}
+
 const basePrice = parseInt(localStorage.getItem("basePrice"), 10);
 
 if (!roomType || isNaN(basePrice)) {
   alert("Room selection missing. Please select a room again.");
   window.location.href = "rooms.html";
 }
+
 
 /* ================= ELEMENTS ================= */
 const roomInfo = document.getElementById("roomInfo");

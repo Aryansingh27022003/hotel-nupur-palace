@@ -75,30 +75,41 @@ module.exports = async function sendEmail(
 
   /* ================= ATTACHMENT ================= */
   /* ================= ATTACHMENT ================= */
-if (pdfPath && pdfPath.startsWith("http")) {
-  const res = await fetch(pdfPath);
-  const buffer = await res.buffer();
+/* ================= ATTACHMENT ================= */
+if (pdfPath) {
+  let buffer;
 
-let filename = `document-${bookingId}.pdf`;
+  // Case 1: Cloudinary / URL-based PDF
+  if (pdfPath.startsWith("http")) {
+    const res = await fetch(pdfPath);
+    buffer = await res.buffer();
+  }
 
-if (type === "CONFIRMATION") {
-  filename = `booking-confirmation-${bookingId}.pdf`;
+  // Case 2: Local filesystem PDF (RECEIPT)
+  else if (fs.existsSync(pdfPath)) {
+    buffer = fs.readFileSync(pdfPath);
+  }
+
+  if (buffer) {
+    let filename = `document-${bookingId}.pdf`;
+
+    if (type === "CONFIRMATION") {
+      filename = `booking-confirmation-${bookingId}.pdf`;
+    }
+    if (type === "RECEIPT") {
+      filename = `payment-receipt-${bookingId}.pdf`;
+    }
+    if (type === "REJECTED") {
+      filename = `refund-proof-${bookingId}.pdf`;
+    }
+
+    attachments.push({
+      content: buffer.toString("base64"),
+      name: filename
+    });
+  }
 }
 
-if (type === "REJECTED") {
-  filename = `refund-proof-${bookingId}.pdf`;
-}
-
-if (type === "RECEIPT") {
-  filename = `payment-receipt-${bookingId}.pdf`;
-}
-
-attachments.push({
-  content: buffer.toString("base64"),
-  name: filename
-});
-
-}
 
 // If pdfPath doesn't exist, attachments remains empty. No problem, email still sends.
 
