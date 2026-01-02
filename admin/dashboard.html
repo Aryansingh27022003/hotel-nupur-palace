@@ -80,17 +80,7 @@
 
 <script>
 
-function fixUrl(url) {
-  if (!url) return "#";
 
-  if (url.includes(".pdf") && url.includes("/image/upload/")) {
-    return url.replace("/image/upload/", "/raw/upload/");
-  }
-
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-
-  return "https://" + url;
-}
 
 
 async function loadBookings() {
@@ -228,7 +218,7 @@ async function loadBookings() {
               : b.bookingStatus === "APPROVED"
                 ? `
                   ✅ Approved<br>
-                  <a href="${fixUrl(b.confirmationPdfPath)}" target="_blank">Download PDF</a>
+                  <a href="${b.confirmationPdfPath}" target="_blank">Download PDF</a>
 
 
                 `

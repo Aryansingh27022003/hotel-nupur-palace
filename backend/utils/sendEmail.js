@@ -75,14 +75,19 @@ module.exports = async function sendEmail(
 
   /* ================= ATTACHMENT ================= */
   /* ================= ATTACHMENT ================= */
-if (pdfPath && fs.existsSync(pdfPath)) {
+if (pdfPath && pdfPath.startsWith("http")) {
+  const res = await fetch(pdfPath);
+  const buffer = await res.buffer();
+
   attachments.push({
-    content: fs.readFileSync(pdfPath).toString("base64"),
-    name: type === "REJECTED"
-      ? `refund-proof-${bookingId}${path.extname(pdfPath)}`
-      : `confirmation-${bookingId}.pdf`
+    content: buffer.toString("base64"),
+    name:
+      type === "REJECTED"
+        ? `refund-proof-${bookingId}.pdf`
+        : `confirmation-${bookingId}.pdf`
   });
-} 
+}
+
 // If pdfPath doesn't exist, attachments remains empty. No problem, email still sends.
 
 

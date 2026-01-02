@@ -229,11 +229,12 @@ doc.on("end", async () => {
   await booking.save();
 
   await sendEmail(
-    booking.email,
-    booking.bookingId,
-    null,
-    "CONFIRMATION"
+  booking.email,
+  booking.bookingId,
+  booking.confirmationPdfPath,  // ✅ URL
+  "CONFIRMATION"
   );
+
 
   res.json({ success: true });
 });
@@ -298,10 +299,11 @@ router.post(
 await sendEmail(
   booking.email,
   booking.bookingId,
-  attachmentPath,  // can be null
+  booking.refundProofPath,   // ✅ Cloudinary URL
   "REJECTED",
   booking.rejectionReason
 );
+
 
 
 

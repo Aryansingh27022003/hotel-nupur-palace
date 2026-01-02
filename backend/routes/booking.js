@@ -499,7 +499,7 @@ function uploadToCloudinary(file, folder) {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
-        resource_type: isPdf ? "raw" : "image"
+        resource_type: "auto" 
       },
       (error, result) => {
         if (error) reject(error);
