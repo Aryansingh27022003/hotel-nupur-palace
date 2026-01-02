@@ -79,7 +79,23 @@
 
 
 <script>
+  
+function fixUrl(url) {
+  if (!url) return "#";
 
+  // Case 1: raw PDFs → try inline first, fallback works
+  if (url.includes("/raw/upload/")) {
+    // Force correct filename + mime hint
+    return url + "?response-content-disposition=inline";
+  }
+
+  // Case 2: normal Cloudinary uploads
+  if (url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/fl_inline/");
+  }
+
+  return url;
+}
 
 
 
