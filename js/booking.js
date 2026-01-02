@@ -10,10 +10,6 @@ const roomType = localStorage.getItem("roomType");
 const guestSection = document.getElementById("guestSection");
 
 // Hide guest selection for Dormitory
-if (roomType === "Dormitory") {
-  guestSection.style.display = "none";
-  guestsInput.value = "0";
-}
 
 const basePrice = parseInt(localStorage.getItem("basePrice"), 10);
 
@@ -88,6 +84,12 @@ sameAsMobile.addEventListener("change", () => {
     whatsappInput.readOnly = false;
   }
 });
+
+if (roomType === "Dormitory" && guestSection) {
+  guestSection.style.display = "none";
+  guestsInput.value = "0";
+}
+
 
 /* ================= GUEST DETAILS (RELATION LIST KEPT) ================= */
 guestsInput.addEventListener("change", () => {
