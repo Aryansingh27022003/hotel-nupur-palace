@@ -7,7 +7,9 @@ let payableAmount = 0;
 
 /* ================= ROOM DATA ================= */
 const roomType = localStorage.getItem("roomType");
+const guestWrapper = document.getElementById("guestWrapper");
 const guestSection = document.getElementById("guestSection");
+
 
 // Hide guest selection for Dormitory
 
@@ -23,6 +25,7 @@ if (!roomType || isNaN(basePrice)) {
 const roomInfo = document.getElementById("roomInfo");
 const nameInput = document.getElementById("name");
 const ageInput = document.getElementById("age");
+const genderInput = document.getElementById("gender");
 const bookerId = document.getElementById("bookerId");
 const emailInput = document.getElementById("email");
 const fromPlaceInput = document.getElementById("fromPlace");
@@ -55,6 +58,22 @@ const paymentProofInput = document.getElementById("paymentProof");
 roomInfo.innerText = `Room Selected: ${roomType} | ₹${basePrice} / night`;
 paymentSection.style.display = "block";
 
+
+if (roomType === "Dormitory" && genderInput) {
+  // Clear all options
+  genderInput.innerHTML = "";
+
+  // Add ONLY Male
+  const maleOption = document.createElement("option");
+  maleOption.value = "Male";
+  maleOption.textContent = "Male";
+
+  genderInput.appendChild(maleOption);
+
+  // Auto-select Male
+  genderInput.value = "Male";
+}
+
 /* ================= DATE RULES ================= */
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -85,10 +104,11 @@ sameAsMobile.addEventListener("change", () => {
   }
 });
 
-if (roomType === "Dormitory" && guestSection) {
-  guestSection.style.display = "none";
+if (roomType === "Dormitory" && guestWrapper) {
+  guestWrapper.style.display = "none";
   guestsInput.value = "0";
 }
+
 
 
 /* ================= GUEST DETAILS (RELATION LIST KEPT) ================= */
@@ -102,6 +122,13 @@ guestsInput.addEventListener("change", () => {
         <h4>Guest ${i}</h4>
 
         <input name="guest_name_${i}" placeholder="Guest Name" required>
+        <select name="guest_gender_${i}" required>
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+        </select>
+
         <input name="guest_age_${i}" type="number" min="1" placeholder="Age" required>
 
         <select name="guest_relation_${i}" required>
@@ -120,7 +147,6 @@ guestsInput.addEventListener("change", () => {
           <option>Friend</option>
           <option>Colleague</option>
           <option>Guardian</option>
-          <option>Other</option>
         </select>
 
         <label>ID Proof</label>
@@ -136,6 +162,7 @@ guestsInput.addEventListener("change", () => {
 function validatePrimaryForm() {
   if (!nameInput.value.trim()) return alert("Enter full name"), false;
   if (!ageInput.value || ageInput.value < 1) return alert("Enter valid age"), false;
+  if (!genderInput.value) return alert("Select gender"), false;
   if (!/^\d{10}$/.test(phoneInput.value)) return alert("Enter valid mobile"), false;
   if (!emailInput.value.includes("@")) return alert("Enter valid email"), false;
   if (!checkInInput.value || !checkOutInput.value) return alert("Select dates"), false;
@@ -160,10 +187,16 @@ function calculateTotal() {
   const guestCount = parseInt(guestsInput.value || "0", 10);
   payableAmount = (basePrice + guestCount * 200) * nights;
 
-  totalAmountText.innerText =
-    `Total Payable: ₹${payableAmount} (${nights} nights, ${guestCount} guests)`;
+  if (roomType === "Dormitory") {
+    totalAmountText.innerText =
+      `Total Payable: ₹${payableAmount} (${nights} nights)`;
+  } else {
+    totalAmountText.innerText =
+      `Total Payable: ₹${payableAmount} (${nights} nights, ${guestCount} guests)`;
+  }
 
-  const upiId = "aryansingh27022003@oksbi";
+
+  const upiId = "9546693272-1@okbizaxis";
   upiText.innerText = upiId;
   payAmountSpan.innerText = payableAmount;
 
@@ -189,6 +222,7 @@ finalSubmitBtn.onclick = async () => {
 
     fd.append("name", nameInput.value.trim());
     fd.append("age", ageInput.value);
+    fd.append("gender", genderInput.value);
     fd.append("phone", phoneInput.value);
     fd.append("whatsapp", whatsappInput.value);
     fd.append("email", emailInput.value);
@@ -212,6 +246,7 @@ finalSubmitBtn.onclick = async () => {
     const guestCount = parseInt(guestsInput.value || "0", 10);
     for (let i = 1; i <= guestCount; i++) {
       fd.append(`guest_name_${i}`, document.querySelector(`[name="guest_name_${i}"]`).value);
+      fd.append(`guest_gender_${i}`, document.querySelector(`[name="guest_gender_${i}"]`).value);
       fd.append(`guest_age_${i}`, document.querySelector(`[name="guest_age_${i}"]`).value);
       fd.append(`guest_relation_${i}`, document.querySelector(`[name="guest_relation_${i}"]`).value);
       fd.append(`guest_id_${i}`, document.querySelector(`[name="guest_id_${i}"]`).files[0]);

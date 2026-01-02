@@ -555,17 +555,20 @@ router.post("/create-pending", upload.any(), async (req, res) => {
       }
 
       guests.push({
-        name: body[`guest_name_${i}`],
-        age: body[`guest_age_${i}`],
-        relation: body[`guest_relation_${i}`],
-        idProofPath: guestIdUrl
-      });
+      name: body[`guest_name_${i}`],
+      age: body[`guest_age_${i}`],
+      gender: body[`guest_gender_${i}`],
+      relation: body[`guest_relation_${i}`],
+      idProofPath: guestIdUrl
+    });
+
     }
 
     const booking = new Booking({
       bookingId,
       name: body.name,
       age: body.age,
+      gender: body.gender,
       phone: body.phone,
       whatsapp: body.whatsapp,
       email: body.email,

@@ -4,9 +4,11 @@ const mongoose = require("mongoose");
 const GuestSchema = new mongoose.Schema({
   name: String,
   age: Number,
+  gender: String,
   relation: String,
   idProofPath: String
 });
+
 
 /* ================= BOOKING ================= */
 const BookingSchema = new mongoose.Schema({
@@ -15,6 +17,7 @@ const BookingSchema = new mongoose.Schema({
   /* ---- Primary Booker ---- */
   name: String,
   age: Number,
+  gender: String,
   phone: String,
   whatsapp: String,
   email: String,

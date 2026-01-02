@@ -139,6 +139,7 @@ async function loadBookings() {
         <td>
         <b>${b.name}</b><br>
         Age: ${b.age || "-"}<br>
+        Gender: ${b.gender || "-"}<br>
         📞 ${b.phone}<br>
         💬 ${b.whatsapp || "-"}<br>
         ✉️ ${b.email || "-"}<br><br>
@@ -165,7 +166,7 @@ async function loadBookings() {
             b.guests?.length
               ? b.guests.map((g, i) => `
                 <b>Guest ${i + 1}</b><br>
-                ${g.name}, ${g.age} (${g.relation})<br><br>
+                ${g.name}, ${g.age}, ${g.gender} (${g.relation})<br><br>
                <b>Guest ${i + 1} ID:</b> 
                <a href="${fixUrl(g.idProofPath)}" target="_blank">View</a>
 

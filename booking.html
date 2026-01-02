@@ -22,6 +22,13 @@
             <!-- PRIMARY BOOKER -->
             <input type="text" id="name" placeholder="Full Name" required>
             <input type="number" id="age" placeholder="Age" min="1" required>
+            <select id="gender" required>
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+            </select>
+
 
             <label>Country</label>
             <input type="text" value="India" readonly>
@@ -46,18 +53,22 @@
             <input type="date" id="checkOut" required>
 
             <!-- GUESTS -->
+        <div id="guestWrapper">
         <label>Additional Guests</label>
+
         <div id="guestSection">
-        <label>Number of Guests</label>
-        <select id="guests">
+            <label>Number of Guests</label>
+            <select id="guests">
             <option value="0">0</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
-        </select>
+            </select>
 
-        <div id="guestDetails"></div>
+            <div id="guestDetails"></div>
         </div>
+        </div>
+
 
 
             <input type="text" id="fromPlace" placeholder="Coming From" required>
