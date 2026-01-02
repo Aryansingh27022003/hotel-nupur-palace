@@ -79,13 +79,25 @@ if (pdfPath && pdfPath.startsWith("http")) {
   const res = await fetch(pdfPath);
   const buffer = await res.buffer();
 
-  attachments.push({
-    content: buffer.toString("base64"),
-    name:
-      type === "REJECTED"
-        ? `refund-proof-${bookingId}.pdf`
-        : `confirmation-${bookingId}.pdf`
-  });
+let filename = `document-${bookingId}.pdf`;
+
+if (type === "CONFIRMATION") {
+  filename = `booking-confirmation-${bookingId}.pdf`;
+}
+
+if (type === "REJECTED") {
+  filename = `refund-proof-${bookingId}.pdf`;
+}
+
+if (type === "RECEIPT") {
+  filename = `payment-receipt-${bookingId}.pdf`;
+}
+
+attachments.push({
+  content: buffer.toString("base64"),
+  name: filename
+});
+
 }
 
 // If pdfPath doesn't exist, attachments remains empty. No problem, email still sends.

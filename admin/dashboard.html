@@ -79,7 +79,7 @@
 
 
 <script>
-  
+
 function fixUrl(url) {
   if (!url) return "#";
 
@@ -88,12 +88,6 @@ function fixUrl(url) {
     // Force correct filename + mime hint
     return url + "?response-content-disposition=inline";
   }
-
-  // Case 2: normal Cloudinary uploads
-  if (url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/fl_inline/");
-  }
-
   return url;
 }
 
