@@ -176,6 +176,51 @@ function validatePrimaryForm() {
   return true;
 }
 
+function validateGuestDetails() {
+  const guestCount = parseInt(guestsInput.value || "0", 10);
+
+  for (let i = 1; i <= guestCount; i++) {
+    const name = document.querySelector(`[name="guest_name_${i}"]`);
+    const gender = document.querySelector(`[name="guest_gender_${i}"]`);
+    const age = document.querySelector(`[name="guest_age_${i}"]`);
+    const relation = document.querySelector(`[name="guest_relation_${i}"]`);
+    const id = document.querySelector(`[name="guest_id_${i}"]`);
+
+    if (!name || !name.value.trim()) {
+      alert(`Enter name for Guest ${i}`);
+      name.focus();
+      return false;
+    }
+
+    if (!gender || !gender.value) {
+      alert(`Select gender for Guest ${i}`);
+      gender.focus();
+      return false;
+    }
+
+    if (!age || age.value < 1) {
+      alert(`Enter valid age for Guest ${i}`);
+      age.focus();
+      return false;
+    }
+
+    if (!relation || !relation.value) {
+      alert(`Select relation for Guest ${i}`);
+      relation.focus();
+      return false;
+    }
+
+    if (!id || !id.files || !id.files[0]) {
+      alert(`Upload ID proof for Guest ${i}`);
+      id.focus();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 /* ================= TOTAL ================= */
 function calculateTotal() {
   if (!checkInInput.value || !checkOutInput.value) return;
@@ -213,6 +258,9 @@ function calculateTotal() {
 finalSubmitBtn.onclick = async () => {
   if (finalSubmitBtn.disabled) return;
   if (!validatePrimaryForm()) return;
+  if (!validateGuestDetails()) return;
+
+
 
   finalSubmitBtn.disabled = true;
   finalSubmitBtn.innerText = "Submitting...";
