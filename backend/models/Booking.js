@@ -17,7 +17,10 @@ const BookingSchema = new mongoose.Schema({
   /* ---- Primary Booker ---- */
   name: String,
   age: Number,
-  gender: String,
+  gender: {
+  type: String,
+  default: "Male"
+  },
   phone: String,
   whatsapp: String,
   email: String,
