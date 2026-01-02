@@ -1,7 +1,7 @@
 /* =========================================================
    booking.js — ONE GO SUBMIT (RELATION KEPT)
    ========================================================= */
-
+document.addEventListener("DOMContentLoaded", () => {
 let bookingId = null;
 let payableAmount = 0;
 
@@ -242,3 +242,4 @@ finalSubmitBtn.onclick = async () => {
     alert("Submission failed");
   }
 };
+});
