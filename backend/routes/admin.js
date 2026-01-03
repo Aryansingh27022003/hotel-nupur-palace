@@ -192,9 +192,9 @@ router.post("/approve/:bookingId", async (req, res) => {
       .fontSize(11)
       .fillColor("black")
       .text(
-        "• Please carry ORIGINAL government-issued ID proof for all guests.\n\n" +
-        "• Check-in Time: 12:00 PM | Check-out Time: 11:00 AM.\n\n" +
-        "• This confirmation must be shown at reception.",
+        "• Please carry an ORIGINAL government-issued ID proof for all guests at the time of check-in.\n\n" +
+        "• The check-out time is 24 hours from the time of check-in.\n\n" +
+        "• This confirmation must be presented at the reception.",
         85,
         doc.y,
         { width: 360 }
